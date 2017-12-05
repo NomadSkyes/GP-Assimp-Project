@@ -21,12 +21,22 @@ private:
 
 		this->world = new btDiscreteDynamicsWorld(this->dispatcher, this->broadphase, this->solver, this->collisionConfig);
 		this->world->setGravity(btVector3(0, -10, 0));	//set gravitational constant
-
-
 	}
+
+
+
+	// physics callback
+	bool callbackFunc(btManifoldPoint& contactPoint, const btCollisionObjectWrapper* obj1, int id1, int index1, const btCollisionObjectWrapper* obj2, int id2, int index2) {
+		std::cout << "collision" << endl;
+		return false;
+	}
+
 public:
 	CollisionSystem() {
 		init();
+		
+		// physics callback
+		//gContactAddedCallback = callbackFunc;
 	}
 	// delete colliders
 	~CollisionSystem() {
@@ -77,6 +87,11 @@ public:
 		btRigidBody::btRigidBodyConstructionInfo info(mass, motion, sphere, inertia);
 		btRigidBody* body = new btRigidBody(info);
 		AddBody(body);
+
+		//debugging
+		body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
+
+
 		return body;
 	}
 
@@ -128,6 +143,8 @@ public:
 		this->world->addRigidBody(body);
 		bodies.push_back(body);
 	}
+
+
 
 };
 
