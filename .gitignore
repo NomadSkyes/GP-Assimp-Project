@@ -11,7 +11,7 @@
 *.userprefs
 
 # Other folders to exclude
-Debug/GP Assimp Test.exe
+
 Debug/GP Assimp Test.ilk
 Debug/GP Assimp Test.pdb
 GP Assimp Test/Debug
