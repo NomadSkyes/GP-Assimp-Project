@@ -130,10 +130,10 @@ int main()
 
 	// Load models
 	//Model ourModel("res/models/nanosuit.obj");
-	Model lvl1_a("res/models/LVL1.obj");
-	Model lvl1_b("res/models/LVL1.obj");
+	Model lvl1_a("res/models/debugLVL.obj");
+	/*Model lvl1_b("res/models/LVL1.obj");
 	Model lvl1_c("res/models/LVL1.obj");
-	Model lvl1_d("res/models/LVL1.obj");
+	Model lvl1_d("res/models/LVL1.obj");*/
 
 	Model player("res/models/Gladiator.obj");
 
@@ -179,36 +179,36 @@ int main()
 
 		// Draw the loaded model
 		glm::mat4 model_a;
-		glm::mat4 model_b;
-		glm::mat4 model_c;
-		glm::mat4 model_d;
+		//glm::mat4 model_b;
+		//glm::mat4 model_c;
+		//glm::mat4 model_d;
 
 		glm::mat4 player_1;
 
 		model_a = glm::translate(model_a, lvl1_aPos); // Translate it down a bit so it's at the center of the scene
 		model_a = glm::scale(model_a, glm::vec3(1.0f, 1.0f, 1.0f));	// It's a bit too big for our scene, so scale it down
-		model_a = glm::rotate(model_a, float(-90 * DEG_TO_RADIAN), glm::vec3(1.0f, 0.0f, 0.0f));
+		//model_a = glm::rotate(model_a, float(-90 * DEG_TO_RADIAN), glm::vec3(1.0f, 0.0f, 0.0f));
 		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model_a));
 		lvl1_a.Draw(shader);
 
 
-		model_b = glm::translate(model_b, lvl1_bPos); // Translate it down a bit so it's at the center of the scene
-		model_b = glm::scale(model_b, glm::vec3(1.0f, 1.0f, 1.0f));	// It's a bit too big for our scene, so scale it down
-		model_b = glm::rotate(model_b, float(-90 * DEG_TO_RADIAN), glm::vec3(1.0f, 0.0f, 0.0f));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model_b));
-		lvl1_b.Draw(shader);
+		//model_b = glm::translate(model_b, lvl1_bPos); // Translate it down a bit so it's at the center of the scene
+		//model_b = glm::scale(model_b, glm::vec3(1.0f, 1.0f, 1.0f));	// It's a bit too big for our scene, so scale it down
+		//model_b = glm::rotate(model_b, float(-90 * DEG_TO_RADIAN), glm::vec3(1.0f, 0.0f, 0.0f));
+		//glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model_b));
+		//lvl1_b.Draw(shader);
 
-		model_c = glm::translate(model_c, lvl1_cPos); // Translate it down a bit so it's at the center of the scene
-		model_c = glm::scale(model_c, glm::vec3(1.0f, 1.0f, 1.0f));	// It's a bit too big for our scene, so scale it down
-		model_c = glm::rotate(model_c, float(-90 * DEG_TO_RADIAN), glm::vec3(1.0f, 0.0f, 0.0f));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model_c));
-		lvl1_c.Draw(shader);
+		//model_c = glm::translate(model_c, lvl1_cPos); // Translate it down a bit so it's at the center of the scene
+		//model_c = glm::scale(model_c, glm::vec3(1.0f, 1.0f, 1.0f));	// It's a bit too big for our scene, so scale it down
+		//model_c = glm::rotate(model_c, float(-90 * DEG_TO_RADIAN), glm::vec3(1.0f, 0.0f, 0.0f));
+		//glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model_c));
+		//lvl1_c.Draw(shader);
 
-		model_d = glm::translate(model_d, lvl1_dPos); // Translate it down a bit so it's at the center of the scene
-		model_d = glm::scale(model_d, glm::vec3(1.0f, 1.0f, 1.0f));	// It's a bit too big for our scene, so scale it down
-		model_d = glm::rotate(model_d, float(-90 * DEG_TO_RADIAN), glm::vec3(1.0f, 0.0f, 0.0f));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model_d));
-		lvl1_d.Draw(shader);
+		//model_d = glm::translate(model_d, lvl1_dPos); // Translate it down a bit so it's at the center of the scene
+		//model_d = glm::scale(model_d, glm::vec3(1.0f, 1.0f, 1.0f));	// It's a bit too big for our scene, so scale it down
+		//model_d = glm::rotate(model_d, float(-90 * DEG_TO_RADIAN), glm::vec3(1.0f, 0.0f, 0.0f));
+		//glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model_d));
+		//lvl1_d.Draw(shader);
 
 		player_1 = glm::translate(player_1, playerEntity.GetPosition()); // Translate it down a bit so it's at the center of the scene
 		player_1 = glm::scale(player_1, glm::vec3(0.1f, 0.1f, 0.1f));	// It's a bit too big for our scene, so scale it down
