@@ -62,7 +62,8 @@ public:
 	// Processes input received from any keyboard-like input system. Accepts input parameter in the form of Entity defined ENUM (to abstract it from windowing systems)
 	void ProcessKeyboard(Entity_Movement direction, GLfloat deltaTime)
 	{
-		GLfloat velocity = this->movementSpeed * deltaTime;
+		//GLfloat velocity = this->movementSpeed * deltaTime;
+		GLfloat velocity = this->movementSpeed;
 
 		if (direction == ENTITY_UP)
 		{
@@ -100,6 +101,10 @@ public:
 
 	glm::vec3 GetPosition()
 	{
+		btTransform trans;
+		_rb->getMotionState()->getWorldTransform(trans);
+		glm::vec3 updatedPos(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
+		this->position = updatedPos;
 		return this->position;
 	}
 
@@ -110,8 +115,11 @@ public:
 
 	void SetPosition(glm::vec3 newPos)
 	{
+		_rb->activate();
+
 		btVector3 temp(newPos.x, newPos.y, newPos.z);
-		_rb->setLinearVelocity(temp);
+		//_rb->setLinearVelocity(temp);
+		_rb->applyForce(temp, btVector3(this->front.x, this->front.y, this->front.z));
 
 		btTransform trans;
 		_rb->getMotionState()->getWorldTransform(trans);
@@ -122,6 +130,7 @@ public:
 	void AddRigidBody(CollisionSystem* _cs) {
 		// adding a sphere collider to test with player
 		_rb = _cs->AddSphere(1.0, this->position.x, this->position.y, this->position.z, 1);
+
 	}
 
 	float getAngle()
@@ -151,7 +160,7 @@ private:
 	GLfloat pitch;
 
 	// Entity options
-	GLfloat movementSpeed;
+	GLfloat movementSpeed = 10;
 	GLfloat mouseSensitivity;
 	GLfloat zoom;
 

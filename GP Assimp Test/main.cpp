@@ -43,7 +43,7 @@ void DoMovement();
 // Camera
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 
-Entity playerEntity(glm::vec3(0.0f, 2.0f, -6.0f));
+Entity playerEntity(glm::vec3(0.0f, 2.0f, 6.0f));
 
 bool keys[1024];
 GLfloat lastX = 400, lastY = 300;
@@ -75,12 +75,17 @@ int main()
 	// add collision plane
 	btRigidBody* plane = collisionSystem->AddPlane();
 
-	// add collision sphere
-	//btRigidBody* sphere = collisionSystem->AddSphere(1.0, 0, 20, 0, 1);
 
 	// add collision box
-	//btRigidBody* cube1 = collisionSystem->AddCube(10, 2, 3, 0, 40, 0, 0.0);
-	//btRigidBody* cube2 = collisionSystem->AddCube(10, 2, 3, 6, 25, 0, 0.0);
+									//(horizontal width < >, vertical height, up/ down length ^)
+	btRigidBody* LeftWall = collisionSystem->AddCube(0.5, 5, 15, -7.5, 0, 0, 0.0);
+	btRigidBody* RightWall = collisionSystem->AddCube(0.5, 5, 15, 7.5, 0, 0, 0.0);
+
+	btRigidBody* TopWall = collisionSystem->AddCube(15, 5, 0.5, 0, 0, -7.5, 0.0);
+	btRigidBody* BottomWall = collisionSystem->AddCube(15, 5, 0.5, 0, 0, 7.5, 0.0);
+
+	btRigidBody* CenterCube = collisionSystem->AddCube(2.5, 5, 2.5, 0, 0, 0, 0.0);
+
 
 	// Init GLFW
 	glfwInit();
