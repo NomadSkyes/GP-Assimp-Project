@@ -10,6 +10,9 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+//bullet
+#include "CollisionSystem.h"
+
 // Defines several possible options for Entity movement. Used as abstraction to stay away from window-system specific input methods
 enum Entity_Movement
 {
@@ -63,22 +66,34 @@ public:
 
 		if (direction == ENTITY_UP)
 		{
-			this->position += this->front * velocity;
+			//this->position += this->front * velocity;
+		
+			glm::vec3 movementVector = this->front * velocity;
+			SetPosition(movementVector);
 		}
 
 		if (direction == ENTITY_DOWN)
 		{
-			this->position -= this->front * velocity;
+			//this->position -= this->front * velocity;
+			glm::vec3 movementVector = -this->front * velocity;
+			SetPosition(movementVector);
+
 		}
 
 		if (direction == ENTITY_LEFT)
 		{
-			this->position -= this->right * velocity;
+			//this->position -= this->right * velocity;
+			glm::vec3 movementVector = -this->right * velocity;
+			SetPosition(movementVector);
+
 		}
 
 		if (direction == ENTITY_RIGHT)
 		{
-			this->position += this->right * velocity;
+			//this->position += this->right * velocity;
+			glm::vec3 movementVector = this->right * velocity;
+			SetPosition(movementVector);
+
 		}
 	}
 
@@ -95,7 +110,18 @@ public:
 
 	void SetPosition(glm::vec3 newPos)
 	{
-		this->position = newPos;
+		btVector3 temp(newPos.x, newPos.y, newPos.z);
+		_rb->setLinearVelocity(temp);
+
+		btTransform trans;
+		_rb->getMotionState()->getWorldTransform(trans);
+		glm::vec3 updatedPos(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
+		this->position = updatedPos;
+	}
+
+	void AddRigidBody(CollisionSystem* _cs) {
+		// adding a sphere collider to test with player
+		_rb = _cs->AddSphere(1.0, this->position.x, this->position.y, this->position.z, 1);
 	}
 
 	float getAngle()
@@ -116,6 +142,9 @@ private:
 	glm::vec3 up;
 	glm::vec3 right;
 	glm::vec3 worldUp;
+
+	// collider
+	btRigidBody* _rb; 
 
 	// Eular Angles
 	GLfloat yaw;

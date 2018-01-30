@@ -43,7 +43,7 @@ void DoMovement();
 // Camera
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 
-Entity playerEntity(glm::vec3(0.0f, 0.0f, -2.0f));
+Entity playerEntity(glm::vec3(0.0f, 2.0f, -6.0f));
 
 bool keys[1024];
 GLfloat lastX = 400, lastY = 300;
@@ -68,15 +68,19 @@ int main()
 	// init bullet physics
 	collisionSystem = new CollisionSystem();
 
+	// pass the collision system into the player to create a rigidbody
+	playerEntity.AddRigidBody(collisionSystem);
+
+
 	// add collision plane
 	btRigidBody* plane = collisionSystem->AddPlane();
 
 	// add collision sphere
-	btRigidBody* sphere = collisionSystem->AddSphere(1.0, 0, 20, 0, 1);
+	//btRigidBody* sphere = collisionSystem->AddSphere(1.0, 0, 20, 0, 1);
 
 	// add collision box
-	btRigidBody* cube1 = collisionSystem->AddCube(10, 2, 3, 0, 40, 0, 1.0);
-	btRigidBody* cube2 = collisionSystem->AddCube(10, 2, 3, 6, 25, 0, 1.0);
+	//btRigidBody* cube1 = collisionSystem->AddCube(10, 2, 3, 0, 40, 0, 0.0);
+	//btRigidBody* cube2 = collisionSystem->AddCube(10, 2, 3, 6, 25, 0, 0.0);
 
 	// Init GLFW
 	glfwInit();
@@ -216,13 +220,13 @@ int main()
 		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(player_1));
 		player.Draw(shader);
 
-		// test sphere (show falling no model)
-		btTransform trans;
-		sphere->getMotionState()->getWorldTransform(trans);
-		if (trans.getOrigin().getY() > 1) {
-			std::cout << "sphere height: " << trans.getOrigin().getY() << std::endl;
+		//// test sphere (show falling no model)
+		//btTransform trans;
+		//sphere->getMotionState()->getWorldTransform(trans);
+		//if (trans.getOrigin().getY() > 1) {
+		//	std::cout << "sphere height: " << trans.getOrigin().getY() << std::endl;
 
-		}
+		//}
 
 
 		// Swap the buffers
