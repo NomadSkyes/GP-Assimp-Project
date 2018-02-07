@@ -10,6 +10,9 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+//bullet
+#include "CollisionSystem.h"
+
 // Defines several possible options for Entity movement. Used as abstraction to stay away from window-system specific input methods
 enum Entity_Movement
 {
@@ -59,32 +62,49 @@ public:
 	// Processes input received from any keyboard-like input system. Accepts input parameter in the form of Entity defined ENUM (to abstract it from windowing systems)
 	void ProcessKeyboard(Entity_Movement direction, GLfloat deltaTime)
 	{
-		GLfloat velocity = this->movementSpeed * deltaTime;
-
+		//GLfloat velocity = this->movementSpeed * deltaTime;
+		GLfloat velocity = this->movementSpeed;
+		
 		if (direction == ENTITY_UP)
 		{
-			this->position += this->front * velocity;
+			//this->position += this->front * velocity;
+			
+			glm::vec3 movementVector = this->front * velocity;
+			SetPosition(movementVector);
 		}
 
 		if (direction == ENTITY_DOWN)
 		{
-			this->position -= this->front * velocity;
+			//this->position -= this->front * velocity;
+			glm::vec3 movementVector = -this->front * velocity;
+			SetPosition(movementVector);
+
 		}
 
 		if (direction == ENTITY_LEFT)
 		{
-			this->position -= this->right * velocity;
+			//this->position -= this->right * velocity;
+			glm::vec3 movementVector = -this->right * velocity;
+			SetPosition(movementVector);
+
 		}
 
 		if (direction == ENTITY_RIGHT)
 		{
-			this->position += this->right * velocity;
+			//this->position += this->right * velocity;
+			glm::vec3 movementVector = this->right * velocity;
+			SetPosition(movementVector);
+
 		}
 	}
 
 
 	glm::vec3 GetPosition()
 	{
+		btTransform trans;
+		_rb->getMotionState()->getWorldTransform(trans);
+		glm::vec3 updatedPos(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
+		this->position = updatedPos;
 		return this->position;
 	}
 
@@ -93,9 +113,51 @@ public:
 		return this->front;
 	}
 
+	void Stop()
+	{
+		_rb->clearForces();
+		_rb->setLinearVelocity(btVector3(0, 0, 0));
+		_rb->setAngularVelocity(btVector3(0, 0, 0));
+
+	}
+
+	void myTickCallback(btDynamicsWorld *world, btScalar timeStep) {
+		// mShipBody is the spaceship's btRigidBody
+		btVector3 velocity = _rb->getLinearVelocity();
+		btScalar speed = velocity.length();
+		if (speed > mMaxSpeed) {
+			velocity *= mMaxSpeed / speed;
+			_rb->setLinearVelocity(velocity);
+			
+		}
+	}
+
+	
+
+	void Attack()
+	{
+
+	}
+
 	void SetPosition(glm::vec3 newPos)
 	{
-		this->position = newPos;
+		_rb->activate();
+
+		btVector3 temp(newPos.x, newPos.y, newPos.z);
+		//_rb->setLinearVelocity(temp);
+		_rb->applyImpulse((temp / 5), (btVector3(this->front.x, this->front.y, this->front.z) / 5));
+
+		btTransform trans;
+		_rb->getMotionState()->getWorldTransform(trans);
+		glm::vec3 updatedPos(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
+		this->position = updatedPos;
+	}
+
+	void AddRigidBody(CollisionSystem* _cs) {
+		// adding a sphere collider to test with player
+		_rb = _cs->AddSphere(1.0, this->position.x, this->position.y, this->position.z, 1);
+	
+
 	}
 
 	float getAngle()
@@ -108,6 +170,12 @@ public:
 		this->pitch = newPitch;
 	}
 
+	void setSpeed(double newMaxSpeed)
+	{
+		mMaxSpeed = newMaxSpeed;
+	}
+
+
 
 private:
 	// Entity Attributes
@@ -117,12 +185,17 @@ private:
 	glm::vec3 right;
 	glm::vec3 worldUp;
 
+	btScalar mMaxSpeed = 0.25;
+
+	// collider
+	btRigidBody* _rb; 
+
 	// Eular Angles
 	GLfloat yaw;
 	GLfloat pitch;
 
 	// Entity options
-	GLfloat movementSpeed;
+	GLfloat movementSpeed = 10;
 	GLfloat mouseSensitivity;
 	GLfloat zoom;
 

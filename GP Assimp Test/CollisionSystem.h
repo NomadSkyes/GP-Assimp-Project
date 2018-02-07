@@ -2,6 +2,7 @@
 
 #include <btBulletDynamicsCommon.h>
 #include <vector>
+using namespace std;
 
 class CollisionSystem {
 private:
@@ -11,7 +12,7 @@ private:
 	btBroadphaseInterface* broadphase;
 	btConstraintSolver* solver;
 
-	vector<btRigidBody*> bodies;
+	std::vector<btRigidBody*> bodies;
 
 	void init() {
 		this->collisionConfig = new btDefaultCollisionConfiguration();
@@ -144,7 +145,10 @@ public:
 		bodies.push_back(body);
 	}
 
-
+	btDynamicsWorld* getWorld()
+	{
+		return this->world;
+	}
 
 };
 
