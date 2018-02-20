@@ -25,6 +25,8 @@
 // Other Libs
 #include "SOIL2.h"
 
+#include "Input.h"
+
 // bullet
 #include "CollisionSystem.h"
 CollisionSystem* collisionSystem;
@@ -43,7 +45,7 @@ void DoMovement();
 // Camera
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 
-Entity playerEntity(glm::vec3(0.0f, 2.0f, 6.0f));
+Entity playerEntity(glm::vec3(0.0f, 1.0f, 6.0f));
 
 bool keys[1024];
 GLfloat lastX = 400, lastY = 300;
@@ -51,6 +53,8 @@ bool firstMouse = true;
 
 GLfloat deltaTime = 0.0f;
 GLfloat lastFrame = 0.0f;
+
+glm::vec3 cameraModifier(0.0f, 0.0f, 0.0f);
 
 //Level Model Positions
 glm::vec3 lvl1_aPos(0.0f, 0.0f, 0.0f);
@@ -71,8 +75,10 @@ int main()
 	// pass the collision system into the player to create a rigidbody
 	playerEntity.AddRigidBody(collisionSystem);
 
+
 	// add collision plane
 	btRigidBody* plane = collisionSystem->AddPlane();
+
 
 	// add collision box
 									//(horizontal width < >, vertical height, up/ down length ^)
@@ -137,7 +143,7 @@ int main()
 
 	// Load models
 	//Model ourModel("res/models/nanosuit.obj");
-	Model lvl1_a ("res/models/debugLVL.obj");
+	Model lvl1_a("res/models/debugLVL.obj");
 	/*Model lvl1_b("res/models/LVL1.obj");
 	Model lvl1_c("res/models/LVL1.obj");
 	Model lvl1_d("res/models/LVL1.obj");*/
@@ -155,11 +161,13 @@ int main()
 	while (!glfwWindowShouldClose(window))
 	{
 		//fixes camera on player
-		playerCameraPos.x = playerEntity.GetPosition().x;
+		playerCameraPos.x = playerEntity.GetPosition().x + cameraModifier.x;
 		playerCameraPos.y = 10.0f;
-		playerCameraPos.z = playerEntity.GetPosition().z + 5;
+		playerCameraPos.z = playerEntity.GetPosition().z + 5 + cameraModifier.z;
 		camera.SetPosition(playerCameraPos);
 		
+		playerEntity.myTickCallback(collisionSystem->getWorld(),1);
+
 		//collision
 		collisionSystem->StepSimulation(1 / 60.0);	// step the physics simulation (default 1/60 seconds)
 
@@ -223,6 +231,15 @@ int main()
 		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(player_1));
 		player.Draw(shader);
 
+		//// test sphere (show falling no model)
+		//btTransform trans;
+		//sphere->getMotionState()->getWorldTransform(trans);
+		//if (trans.getOrigin().getY() > 1) {
+		//	std::cout << "sphere height: " << trans.getOrigin().getY() << std::endl;
+
+		//}
+
+
 		// Swap the buffers
 		glfwSwapBuffers(window);
 	}
@@ -235,12 +252,19 @@ int main()
 void DoMovement()
 {
 	// Camera controls
+	if (!keys[GLFW_KEY_W] && !keys[GLFW_KEY_S] && !keys[GLFW_KEY_A] && !keys[GLFW_KEY_D])
+	{
+		playerEntity.Stop();
+	}
+
 	if (keys[GLFW_KEY_W])
 	{
 		//camera.ProcessKeyboard(FORWARD, deltaTime);
 		//playerPos.x += 0.005f;
 		playerEntity.ProcessKeyboard(ENTITY_UP, deltaTime);
+
 	}
+		
 
 	if (keys[GLFW_KEY_S])
 	{
@@ -263,54 +287,75 @@ void DoMovement()
 		playerEntity.ProcessKeyboard(ENTITY_RIGHT, deltaTime);
 	}
 
-	if (keys[GLFW_KEY_UP])
+	if (keys[GLFW_KEY_UP] || keys[GLFW_KEY_DOWN] || keys[GLFW_KEY_LEFT] || keys[GLFW_KEY_RIGHT])
 	{
-		playerEntity.SetAngle(180.0f);
-	}
+		if (keys[GLFW_KEY_UP])
+		{
+			playerEntity.SetAngle(180.0f);
+			if (cameraModifier.z > -1.0f)
+			{
+				cameraModifier.z -= 0.1f;
+			}
+		}
 
-	if (keys[GLFW_KEY_DOWN])
-	{
-		playerEntity.SetAngle(0.0f);
-	}
+		if (keys[GLFW_KEY_DOWN])
+		{
+			playerEntity.SetAngle(0.0f);
+			if (cameraModifier.z < 1.0f)
+			{
+				cameraModifier.z += 0.1f;
+			}
+		}
 
-	if (keys[GLFW_KEY_LEFT])
-	{
-		playerEntity.SetAngle(-90.0f);
-	}
+		if (keys[GLFW_KEY_LEFT])
+		{
+			playerEntity.SetAngle(-90.0f);
+			if (cameraModifier.x > -1.0f)
+			{
+				cameraModifier.x -= 0.1f;
+			}
+		}
 
-	if (keys[GLFW_KEY_RIGHT])
-	{
-		playerEntity.SetAngle(90.0f);
-	}
-	
-		if (keys[GLFW_KEY_UP]&& keys[GLFW_KEY_LEFT])
-	{
-		playerEntity.SetAngle(180.0f+45.0f);
-	}
+		if (keys[GLFW_KEY_RIGHT])
+		{
+			playerEntity.SetAngle(90.0f);
+			if (cameraModifier.x < 1.0f)
+			{
+				cameraModifier.x += 0.1f;
+			}
+		}
 
-	if (keys[GLFW_KEY_DOWN] && keys[GLFW_KEY_LEFT])
-	{
-		playerEntity.SetAngle(0.0f-45.0f);
-	}
+		if (keys[GLFW_KEY_UP] && keys[GLFW_KEY_LEFT])
+		{
+			playerEntity.SetAngle(180.0f + 45.0f);
 
-	if (keys[GLFW_KEY_UP] && keys[GLFW_KEY_RIGHT])
-	{
-		playerEntity.SetAngle(180.0f - 45.0f);
-	}
+		}
 
-	if (keys[GLFW_KEY_DOWN] && keys[GLFW_KEY_RIGHT])
-	{
-		playerEntity.SetAngle(0.0f + 45.0f);
-	}
+		if (keys[GLFW_KEY_DOWN] && keys[GLFW_KEY_LEFT])
+		{
+			playerEntity.SetAngle(0.0f - 45.0f);
+		}
 
-	if (keys[GLFW_KEY_P])
-	{
-		camera.SetPosition(playerCameraPos);
-	}
+		if (keys[GLFW_KEY_UP] && keys[GLFW_KEY_RIGHT])
+		{
+			playerEntity.SetAngle(180.0f - 45.0f);
+		}
 
-	if (keys[GLFW_KEY_L])
+		if (keys[GLFW_KEY_DOWN] && keys[GLFW_KEY_RIGHT])
+		{
+			playerEntity.SetAngle(0.0f + 45.0f);
+		}
+	}
+	else
 	{
-		camera.SetAngle(-65.0f, 0.0f);
+		if (cameraModifier.x > 0)
+			cameraModifier.x -= 0.1f;
+		if (cameraModifier.x < 0)
+			cameraModifier.x += 0.1f;
+		if (cameraModifier.z > 0)
+			cameraModifier.z -= 0.1f;
+		if (cameraModifier.z < 0)
+			cameraModifier.z += 0.1f;
 	}
 }
 
@@ -334,6 +379,8 @@ void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mode
 		}
 	}
 }
+
+
 
 void MouseCallback(GLFWwindow *window, double xPos, double yPos)
 {

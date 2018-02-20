@@ -150,7 +150,10 @@ public:
 		bodies.push_back(body);
 	}
 
-
+	btDynamicsWorld* getWorld()
+	{
+		return this->world;
+	}
 
 };
 

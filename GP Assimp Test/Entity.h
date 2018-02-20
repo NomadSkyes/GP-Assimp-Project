@@ -13,9 +13,6 @@
 //bullet
 #include "CollisionSystem.h"
 
-// models
-#include "Model.h"
-
 // Defines several possible options for Entity movement. Used as abstraction to stay away from window-system specific input methods
 enum Entity_Movement
 {
@@ -44,8 +41,16 @@ public:
 		this->yaw = yaw;
 		this->pitch = pitch;
 		this->updateEntityVectors();
+	}
 
-		
+	// Constructor with scalar values
+	Entity(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat upX, GLfloat upY, GLfloat upZ, GLfloat yaw, GLfloat pitch) : front(glm::vec3(0.0f, 0.0f, -1.0f)), movementSpeed(ENTITY_SPEED)
+	{
+		this->position = glm::vec3(posX, posY, posZ);
+		this->worldUp = glm::vec3(upX, upY, upZ);
+		this->yaw = yaw;
+		this->pitch = pitch;
+		this->updateEntityVectors();
 	}
 
 	// Returns the view matrix calculated using Eular Angles and the LookAt Matrix
@@ -59,11 +64,11 @@ public:
 	{
 		//GLfloat velocity = this->movementSpeed * deltaTime;
 		GLfloat velocity = this->movementSpeed;
-
+		
 		if (direction == ENTITY_UP)
 		{
 			//this->position += this->front * velocity;
-		
+			
 			glm::vec3 movementVector = this->front * velocity;
 			SetPosition(movementVector);
 		}
@@ -108,12 +113,39 @@ public:
 		return this->front;
 	}
 
+	void Stop()
+	{
+		_rb->clearForces();
+		_rb->setLinearVelocity(btVector3(0, 0, 0));
+		_rb->setAngularVelocity(btVector3(0, 0, 0));
+
+	}
+
+	void myTickCallback(btDynamicsWorld *world, btScalar timeStep) {
+		// mShipBody is the spaceship's btRigidBody
+		btVector3 velocity = _rb->getLinearVelocity();
+		btScalar speed = velocity.length();
+		if (speed > mMaxSpeed) {
+			velocity *= mMaxSpeed / speed;
+			_rb->setLinearVelocity(velocity);
+			
+		}
+	}
+
+	
+
+	void Attack()
+	{
+
+	}
+
 	void SetPosition(glm::vec3 newPos)
 	{
 		_rb->activate();
 
 		btVector3 temp(newPos.x, newPos.y, newPos.z);
-		_rb->applyForce(temp, btVector3(this->front.x, this->front.y, this->front.z));
+		//_rb->setLinearVelocity(temp);
+		_rb->applyImpulse((temp / 5), (btVector3(this->front.x, this->front.y, this->front.z) / 5));
 
 		btTransform trans;
 		_rb->getMotionState()->getWorldTransform(trans);
@@ -124,6 +156,7 @@ public:
 	void AddRigidBody(CollisionSystem* _cs) {
 		// adding a sphere collider to test with player
 		_rb = _cs->AddSphere(1.0, this->position.x, this->position.y, this->position.z, 1);
+	
 
 	}
 
@@ -137,6 +170,12 @@ public:
 		this->pitch = newPitch;
 	}
 
+	void setSpeed(double newMaxSpeed)
+	{
+		mMaxSpeed = newMaxSpeed;
+	}
+
+
 
 private:
 	// Entity Attributes
@@ -146,6 +185,7 @@ private:
 	glm::vec3 right;
 	glm::vec3 worldUp;
 
+	btScalar mMaxSpeed = 0.25;
 
 	// collider
 	btRigidBody* _rb; 
