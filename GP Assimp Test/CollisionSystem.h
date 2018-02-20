@@ -67,6 +67,7 @@ public:
 		btMotionState* motion = new btDefaultMotionState(t);
 		btRigidBody::btRigidBodyConstructionInfo info(0.0, motion, plane);
 		btRigidBody* body = new btRigidBody(info);
+		body->setRollingFriction(18.0f);
 		AddBody(body);
 
 		return body;
@@ -88,6 +89,10 @@ public:
 		btRigidBody::btRigidBodyConstructionInfo info(mass, motion, sphere, inertia);
 		btRigidBody* body = new btRigidBody(info);
 		AddBody(body);
+
+		// testing limiting rotation of collider
+		body->setAngularFactor(btVector3(0, 0, 0));
+
 
 		//debugging
 		body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);

@@ -71,10 +71,8 @@ int main()
 	// pass the collision system into the player to create a rigidbody
 	playerEntity.AddRigidBody(collisionSystem);
 
-
 	// add collision plane
 	btRigidBody* plane = collisionSystem->AddPlane();
-
 
 	// add collision box
 									//(horizontal width < >, vertical height, up/ down length ^)
@@ -139,7 +137,7 @@ int main()
 
 	// Load models
 	//Model ourModel("res/models/nanosuit.obj");
-	Model lvl1_a("res/models/debugLVL.obj");
+	Model lvl1_a ("res/models/debugLVL.obj");
 	/*Model lvl1_b("res/models/LVL1.obj");
 	Model lvl1_c("res/models/LVL1.obj");
 	Model lvl1_d("res/models/LVL1.obj");*/
@@ -224,15 +222,6 @@ int main()
 		player_1 = glm::rotate(player_1, float(playerEntity.getAngle() * DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(player_1));
 		player.Draw(shader);
-
-		//// test sphere (show falling no model)
-		//btTransform trans;
-		//sphere->getMotionState()->getWorldTransform(trans);
-		//if (trans.getOrigin().getY() > 1) {
-		//	std::cout << "sphere height: " << trans.getOrigin().getY() << std::endl;
-
-		//}
-
 
 		// Swap the buffers
 		glfwSwapBuffers(window);

@@ -13,6 +13,9 @@
 //bullet
 #include "CollisionSystem.h"
 
+// models
+#include "Model.h"
+
 // Defines several possible options for Entity movement. Used as abstraction to stay away from window-system specific input methods
 enum Entity_Movement
 {
@@ -41,16 +44,8 @@ public:
 		this->yaw = yaw;
 		this->pitch = pitch;
 		this->updateEntityVectors();
-	}
 
-	// Constructor with scalar values
-	Entity(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat upX, GLfloat upY, GLfloat upZ, GLfloat yaw, GLfloat pitch) : front(glm::vec3(0.0f, 0.0f, -1.0f)), movementSpeed(ENTITY_SPEED)
-	{
-		this->position = glm::vec3(posX, posY, posZ);
-		this->worldUp = glm::vec3(upX, upY, upZ);
-		this->yaw = yaw;
-		this->pitch = pitch;
-		this->updateEntityVectors();
+		
 	}
 
 	// Returns the view matrix calculated using Eular Angles and the LookAt Matrix
@@ -118,7 +113,6 @@ public:
 		_rb->activate();
 
 		btVector3 temp(newPos.x, newPos.y, newPos.z);
-		//_rb->setLinearVelocity(temp);
 		_rb->applyForce(temp, btVector3(this->front.x, this->front.y, this->front.z));
 
 		btTransform trans;
@@ -151,6 +145,7 @@ private:
 	glm::vec3 up;
 	glm::vec3 right;
 	glm::vec3 worldUp;
+
 
 	// collider
 	btRigidBody* _rb; 
