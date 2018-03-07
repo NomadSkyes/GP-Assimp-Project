@@ -67,11 +67,11 @@ public:
 	{
 		//GLfloat velocity = this->movementSpeed * deltaTime;
 		GLfloat velocity = this->movementSpeed;
-		
+
 		if (direction == ENTITY_UP)
 		{
 			//this->position += this->front * velocity;
-			
+
 			glm::vec3 movementVector = this->front * velocity;
 			SetPosition(movementVector);
 		}
@@ -104,11 +104,16 @@ public:
 
 	glm::vec3 GetPosition()
 	{
-		btTransform trans;
-		_rb->getMotionState()->getWorldTransform(trans);
-		glm::vec3 updatedPos(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
-		this->position = updatedPos;
-		return this->position;
+		if (_cs != nullptr) {
+			btTransform trans;
+			_rb->getMotionState()->getWorldTransform(trans);
+			glm::vec3 updatedPos(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
+			this->position = updatedPos;
+			return this->position;
+		}
+		else {
+			cout << "no CollisionSystem reference! (1)" << endl;
+		}
 	}
 
 	glm::vec3 GetFront()
@@ -118,49 +123,123 @@ public:
 
 	void Stop()
 	{
-		_rb->clearForces();
-		_rb->setLinearVelocity(btVector3(0, 0, 0));
-		_rb->setAngularVelocity(btVector3(0, 0, 0));
-
-	}
-
-	void myTickCallback(btDynamicsWorld *world, btScalar timeStep) {
-		// mShipBody is the spaceship's btRigidBody
-		btVector3 velocity = _rb->getLinearVelocity();
-		btScalar speed = velocity.length();
-		if (speed > mMaxSpeed) {
-			velocity *= mMaxSpeed / speed;
-			_rb->setLinearVelocity(velocity);
-			
+		if (_cs != nullptr) {
+			_rb->clearForces();
+			_rb->setLinearVelocity(btVector3(0, 0, 0));
+			_rb->setAngularVelocity(btVector3(0, 0, 0));
+		}
+		else {
+			cout << "no CollisionSystem reference! (2)" << endl;
 		}
 	}
 
-	
+	void myTickCallback(btDynamicsWorld *world, btScalar timeStep) {
+		if (_cs != nullptr) {
+			// mShipBody is the spaceship's btRigidBody
+			btVector3 velocity = _rb->getLinearVelocity();
+			btScalar speed = velocity.length();
+			if (speed > mMaxSpeed) {
+				velocity *= mMaxSpeed / speed;
+				if (_rb != nullptr) {
+					_rb->setLinearVelocity(velocity);
+				}
+			}
+		}
+		else {
+			cout << "no CollisionSystem reference! (3)" << endl;
+		}
+	}
+
 
 	void Attack()
 	{
+		// shoot raycast
+		btVector3 pos(this->position.x, this->position.y, this->position.z);
+		btVector3 dest(this->front.x, this->front.y, this->front.z);
+
+		if (_rb != nullptr || _cs != nullptr) {
+			//_cs->ShootRaycast(pos, (dest * 2));
+			_cs->ShootRaycast(pos, dest);
+		}
+		else {
+			cout << "no CollisionSystem reference! (4)" << endl;
+		}
 
 	}
 
 	void SetPosition(glm::vec3 newPos)
 	{
-		_rb->activate();
+		if (_cs != nullptr) {
+			if (_rb != nullptr) {
+				_rb->activate();
 
-		btVector3 temp(newPos.x, newPos.y, newPos.z);
-		//_rb->setLinearVelocity(temp);
-		_rb->applyImpulse((temp / 5), (btVector3(this->front.x, this->front.y, this->front.z) / 5));
+				btVector3 temp(newPos.x, newPos.y, newPos.z);
+				//_rb->setLinearVelocity(temp);
+				_rb->applyImpulse((temp / 5), (btVector3(this->front.x, this->front.y, this->front.z) / 5));
 
-		btTransform trans;
-		_rb->getMotionState()->getWorldTransform(trans);
-		glm::vec3 updatedPos(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
-		this->position = updatedPos;
+				btTransform trans;
+				_rb->getMotionState()->getWorldTransform(trans);
+				glm::vec3 updatedPos(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
+				this->position = updatedPos;
+			}
+			else {
+				for (int i = 0; i < _multiRb.size(); i++) {
+					_multiRb[i]->activate();
+
+					btVector3 temp(newPos.x, newPos.y, newPos.z);
+					_multiRb[i]->applyImpulse((temp / 5), (btVector3(this->front.x, this->front.y, this->front.z) / 5));
+
+					btTransform trans;
+					_multiRb[i]->getMotionState()->getWorldTransform(trans);
+					glm::vec3 updatedPos(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
+					this->position = updatedPos;
+				}
+			}
+		}
+		else {
+			cout << "no CollisionSystem reference! (5)" << endl;
+		}
 	}
 
-	void AddRigidBody(CollisionSystem* _cs) {
-		// adding a sphere collider to test with player
-		_rb = _cs->AddSphere(1.0, this->position.x, this->position.y, this->position.z, 1);
-	
+	void AddRigidBody(int type) {
+		if (_cs != nullptr) {
+			switch (type) {
+				// sphere
+			case 0:
+				_rb = _cs->AddSphere(1.0, this->position.x, this->position.y, this->position.z, 1);
+				break;
+				// cylinder
+			case 1:
+				_rb = _cs->AddCylinder(1.0, 2.0, this->position.x, this->position.y, this->position.z, 1);
+				break;
+				// cube
+			case 2:
+				_rb = _cs->AddCube(1.0, 1.0, 1.0, this->position.x, this->position.y, this->position.z, 1);
+				break;
+			default:
+				break;
+			}
+		}
+		else {
+			cout << "no CollisionSystem reference! (6)" << endl;
+		}
+	}
 
+	// add multiple rigidbodies to an object
+	void AddMultipleRigidBodies(float dx, float dy, float dz, float posx, float posy, float posz, float mass) {
+		if (_cs != nullptr) {
+			btRigidBody* _mRb = _cs->AddCube(dx, dz, dz, posx, posy, posz, mass);
+			_multiRb.push_back(_mRb);
+		}
+		else {
+			cout << "no CollisionSystem reference! (7)" << endl;
+		}
+	}
+
+
+	// pass through a pointer to the collision system
+	void SetCollisionSystem(CollisionSystem* cs) {
+		this->_cs = cs;
 	}
 
 	float getAngle()
@@ -179,15 +258,41 @@ public:
 	}
 
 	// audio
+	// pass through a pointer to the audio system
+	void SetAudioSystem(AudioSystem* as) {
+		this->_as = as;
+	}
 	// add sound source
-	void setSound(string path, AudioSystem* _as) {
-		testSound = _as->AddSoundSource(path, 1);
-
+	void setSound(string path) {
+		if (_as != nullptr) {
+			testSound = _as->AddSoundSource(path, 1);
+		}
+		else {
+			cout << "no AudioSystem reference! (1)" << endl;
+		}
 	}
 
 	// play the sound at the entity's position
-	void playSound(AudioSystem* _as) {
-		_as->PlaySound3D(testSound, position);
+	void playSound() {
+		if (_as != nullptr) {
+			_as->PlaySound3D(testSound, position);
+		}
+		else {
+			cout << "no AudioSystem reference! (2)" << endl;
+		}
+	}
+
+	// model
+	void SetModel(string path) {
+		if (!path.empty()) {
+			const char *_tmpChar = path.c_str();
+			model.LoadModel(_tmpChar);
+		}
+	}
+
+	// return entity model
+	Model GetModel() {
+		return this->model;
 	}
 
 
@@ -199,10 +304,15 @@ private:
 	glm::vec3 right;
 	glm::vec3 worldUp;
 
+	// model;
+	Model model;
+
 	btScalar mMaxSpeed = 0.25;
 
-	// collider
+	// colliders
+	CollisionSystem* _cs = nullptr;
 	btRigidBody* _rb; 
+	vector<btRigidBody*> _multiRb;
 
 	// Eular Angles
 	GLfloat yaw;
@@ -214,6 +324,7 @@ private:
 	GLfloat zoom;
 
 	// entity sounds
+	AudioSystem* _as = nullptr;
 	ISoundSource* testSound;
 
 	// Calculates the front vector from the Entity's (updated) Eular Angles

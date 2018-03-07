@@ -4,6 +4,8 @@
 #include <vector>
 using namespace std;
 
+#include "Model.h"
+
 class CollisionSystem {
 private:
 	btDynamicsWorld* world;
@@ -153,6 +155,21 @@ public:
 	btDynamicsWorld* getWorld()
 	{
 		return this->world;
+	}
+
+	// draw ray using starting point, and end
+	void ShootRaycast(const btVector3 &Start, btVector3 &End) {
+		//world->getDebugDrawer()->drawLine(Start, End, btVector4(0, 0, 0, 1));
+
+		btCollisionWorld::ClosestRayResultCallback RayCallback(Start, End);
+
+		// Perform raycast
+		world->rayTest(Start, End, RayCallback);
+
+		if (RayCallback.hasHit()) {
+			std::cout << "hit" << endl;
+			// Do some clever stuff here
+		}
 	}
 
 };

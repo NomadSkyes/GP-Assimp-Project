@@ -49,7 +49,9 @@ void DoMovement();
 // Camera
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 
+// entities
 Entity playerEntity(glm::vec3(0.0f, 1.0f, 6.0f));
+Entity level01Entity(glm::vec3(0.0f, 0.0f, 0.0f));
 
 bool keys[1024];
 GLfloat lastX = 400, lastY = 300;
@@ -73,35 +75,40 @@ glm::vec3 playerCameraPos;
 
 int main()
 {
-
+	// init irrklang
 	audioSystem = new AudioSystem;
-	// set the listener's position to the camera's position
-	audioSystem->UpdateListnerPosition(camera.GetPosition(), camera.GetFront());
-
-	// give the player entity a sound
-	playerEntity.setSound("res/audio/explosion.wav", audioSystem);
 
 	// init bullet physics
 	collisionSystem = new CollisionSystem();
 
-	// pass the collision system into the player to create a rigidbody
-	playerEntity.AddRigidBody(collisionSystem);
+	
 
+	// give the entities a reference to the collision system
+	playerEntity.SetCollisionSystem(collisionSystem);
+	level01Entity.SetCollisionSystem(collisionSystem);
+
+	// give the player entity a reference to the audio system
+	playerEntity.SetAudioSystem(audioSystem);
+
+
+	// set the listener's position to the camera's position
+	audioSystem->UpdateListnerPosition(camera.GetPosition(), camera.GetFront());
+
+	// give the player entity a sound
+	playerEntity.setSound("res/audio/explosion.wav");
+
+	// player create a rigidbody
+	playerEntity.AddRigidBody(0);
+
+	// pass the collision system into the level object to create a rigidbody
+	level01Entity.AddMultipleRigidBodies(0.5, 5, 15, -7.5, 0, 0, 0.0);
+	level01Entity.AddMultipleRigidBodies(0.5, 5, 15, 7.5, 0, 0, 0.0);
+	level01Entity.AddMultipleRigidBodies(15, 5, 0.5, 0, 0, -7.5, 0.0);
+	level01Entity.AddMultipleRigidBodies(15, 5, 0.5, 0, 0, 7.5, 0.0);
+	level01Entity.AddMultipleRigidBodies(2.5, 5, 2.5, 0, 0, 0, 0.0);
 
 	// add collision plane
 	btRigidBody* plane = collisionSystem->AddPlane();
-
-
-	// add collision box
-									//(horizontal width < >, vertical height, up/ down length ^)
-	btRigidBody* LeftWall = collisionSystem->AddCube(0.5, 5, 15, -7.5, 0, 0, 0.0);
-	btRigidBody* RightWall = collisionSystem->AddCube(0.5, 5, 15, 7.5, 0, 0, 0.0);
-
-	btRigidBody* TopWall = collisionSystem->AddCube(15, 5, 0.5, 0, 0, -7.5, 0.0);
-	btRigidBody* BottomWall = collisionSystem->AddCube(15, 5, 0.5, 0, 0, 7.5, 0.0);
-
-	btRigidBody* CenterCube = collisionSystem->AddCube(2.5, 5, 2.5, 0, 0, 0, 0.0);
-
 
 	// Init GLFW
 	glfwInit();
@@ -154,13 +161,9 @@ int main()
 	Shader shader("res/shaders/modelLoading.vs", "res/shaders/modelLoading.frag");
 
 	// Load models
-	//Model ourModel("res/models/nanosuit.obj");
-	Model lvl1_a("res/models/debugLVL.obj");
-	/*Model lvl1_b("res/models/LVL1.obj");
-	Model lvl1_c("res/models/LVL1.obj");
-	Model lvl1_d("res/models/LVL1.obj");*/
-
-	Model player("res/models/Gladiator.obj");
+	// set entity models 
+	level01Entity.SetModel("res/models/debugLVL.obj");
+	playerEntity.SetModel("res/models/Gladiator.obj");
 
 	camera.SetAngle(-65.0f, -90.0f);
 
@@ -187,7 +190,6 @@ int main()
 		collisionSystem->StepSimulation(1 / 60.0);	// step the physics simulation (default 1/60 seconds)
 
 
-
 		// Set frame time
 		GLfloat currentFrame = glfwGetTime();
 		deltaTime = currentFrame - lastFrame;
@@ -209,9 +211,6 @@ int main()
 
 		// Draw the loaded model
 		glm::mat4 model_a;
-		//glm::mat4 model_b;
-		//glm::mat4 model_c;
-		//glm::mat4 model_d;
 
 		glm::mat4 player_1;
 
@@ -219,40 +218,16 @@ int main()
 		model_a = glm::scale(model_a, glm::vec3(1.0f, 1.0f, 1.0f));	// It's a bit too big for our scene, so scale it down
 		//model_a = glm::rotate(model_a, float(-90 * DEG_TO_RADIAN), glm::vec3(1.0f, 0.0f, 0.0f));
 		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model_a));
-		lvl1_a.Draw(shader);
+		//lvl1_a.Draw(shader);
+		level01Entity.GetModel().Draw(shader);
 
-
-		//model_b = glm::translate(model_b, lvl1_bPos); // Translate it down a bit so it's at the center of the scene
-		//model_b = glm::scale(model_b, glm::vec3(1.0f, 1.0f, 1.0f));	// It's a bit too big for our scene, so scale it down
-		//model_b = glm::rotate(model_b, float(-90 * DEG_TO_RADIAN), glm::vec3(1.0f, 0.0f, 0.0f));
-		//glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model_b));
-		//lvl1_b.Draw(shader);
-
-		//model_c = glm::translate(model_c, lvl1_cPos); // Translate it down a bit so it's at the center of the scene
-		//model_c = glm::scale(model_c, glm::vec3(1.0f, 1.0f, 1.0f));	// It's a bit too big for our scene, so scale it down
-		//model_c = glm::rotate(model_c, float(-90 * DEG_TO_RADIAN), glm::vec3(1.0f, 0.0f, 0.0f));
-		//glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model_c));
-		//lvl1_c.Draw(shader);
-
-		//model_d = glm::translate(model_d, lvl1_dPos); // Translate it down a bit so it's at the center of the scene
-		//model_d = glm::scale(model_d, glm::vec3(1.0f, 1.0f, 1.0f));	// It's a bit too big for our scene, so scale it down
-		//model_d = glm::rotate(model_d, float(-90 * DEG_TO_RADIAN), glm::vec3(1.0f, 0.0f, 0.0f));
-		//glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model_d));
-		//lvl1_d.Draw(shader);
 
 		player_1 = glm::translate(player_1, playerEntity.GetPosition()); // Translate it down a bit so it's at the center of the scene
 		player_1 = glm::scale(player_1, glm::vec3(0.1f, 0.1f, 0.1f));	// It's a bit too big for our scene, so scale it down
 		player_1 = glm::rotate(player_1, float(playerEntity.getAngle() * DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(player_1));
-		player.Draw(shader);
-
-		//// test sphere (show falling no model)
-		//btTransform trans;
-		//sphere->getMotionState()->getWorldTransform(trans);
-		//if (trans.getOrigin().getY() > 1) {
-		//	std::cout << "sphere height: " << trans.getOrigin().getY() << std::endl;
-
-		//}
+		//player.Draw(shader);
+		playerEntity.GetModel().Draw(shader);
 
 
 		// Swap the buffers
@@ -274,31 +249,22 @@ void DoMovement()
 
 	if (keys[GLFW_KEY_W])
 	{
-		//camera.ProcessKeyboard(FORWARD, deltaTime);
-		//playerPos.x += 0.005f;
 		playerEntity.ProcessKeyboard(ENTITY_UP, deltaTime);
-
 	}
 		
 
 	if (keys[GLFW_KEY_S])
 	{
-		//camera.ProcessKeyboard(BACKWARD, deltaTime);
-		//playerPos.x -= 0.005f;
 		playerEntity.ProcessKeyboard(ENTITY_DOWN, deltaTime);
 	}
 
 	if (keys[GLFW_KEY_A])
 	{
-		//camera.ProcessKeyboard(LEFT, deltaTime);
-		//playerPos.z -= 0.005f;
 		playerEntity.ProcessKeyboard(ENTITY_LEFT, deltaTime);
 	}
 
 	if (keys[GLFW_KEY_D])
 	{
-		//camera.ProcessKeyboard(RIGHT, deltaTime);
-		//playerPos.z += 0.005f;
 		playerEntity.ProcessKeyboard(ENTITY_RIGHT, deltaTime);
 
 	}
@@ -306,7 +272,8 @@ void DoMovement()
 	if (keys[GLFW_KEY_SPACE])
 	{
 		// play sound
-		playerEntity.playSound(audioSystem);
+		playerEntity.playSound();
+		playerEntity.Attack();
 
 	}
 

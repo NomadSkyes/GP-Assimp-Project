@@ -21,14 +21,14 @@ public:
 		this->engine = createIrrKlangDevice();
 
 	}
-	//~AudioSystem() {
-	//	// delete the sound sources
-	//	engine->removeAllSoundSources();
-	//	//soundSources.clear();
+	~AudioSystem() {
+		// delete the sound sources
+		engine->removeAllSoundSources();
+		//soundSources.clear();
 
-	//	// delete the sound engine
-	//	engine->drop();
-	//}
+		// delete the sound engine
+		engine->drop();
+	}
 
 	// play single sound in 2D
 	void PlaySound2D(string path) {
