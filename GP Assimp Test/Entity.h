@@ -13,6 +13,9 @@
 //bullet
 #include "CollisionSystem.h"
 
+// Audio
+#include "AudioSystem.h"
+
 // Defines several possible options for Entity movement. Used as abstraction to stay away from window-system specific input methods
 enum Entity_Movement
 {
@@ -175,6 +178,17 @@ public:
 		mMaxSpeed = newMaxSpeed;
 	}
 
+	// audio
+	// add sound source
+	void setSound(string path, AudioSystem* _as) {
+		testSound = _as->AddSoundSource(path, 1);
+
+	}
+
+	// play the sound at the entity's position
+	void playSound(AudioSystem* _as) {
+		_as->PlaySound3D(testSound, position);
+	}
 
 
 private:
@@ -198,6 +212,9 @@ private:
 	GLfloat movementSpeed = 10;
 	GLfloat mouseSensitivity;
 	GLfloat zoom;
+
+	// entity sounds
+	ISoundSource* testSound;
 
 	// Calculates the front vector from the Entity's (updated) Eular Angles
 	void updateEntityVectors()

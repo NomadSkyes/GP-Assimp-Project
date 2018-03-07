@@ -25,11 +25,15 @@
 // Other Libs
 #include "SOIL2.h"
 
-#include "Input.h"
+//#include "Input.h"
 
 // bullet
 #include "CollisionSystem.h"
 CollisionSystem* collisionSystem;
+
+//irrklang
+#include "AudioSystem.h"
+AudioSystem* audioSystem;
 
 // Properties
 const GLuint WIDTH = 800, HEIGHT = 600;
@@ -69,6 +73,14 @@ glm::vec3 playerCameraPos;
 
 int main()
 {
+
+	audioSystem = new AudioSystem;
+	// set the listener's position to the camera's position
+	audioSystem->UpdateListnerPosition(camera.GetPosition(), camera.GetFront());
+
+	// give the player entity a sound
+	playerEntity.setSound("res/audio/explosion.wav", audioSystem);
+
 	// init bullet physics
 	collisionSystem = new CollisionSystem();
 
@@ -166,6 +178,9 @@ int main()
 		playerCameraPos.z = playerEntity.GetPosition().z + 5 + cameraModifier.z;
 		camera.SetPosition(playerCameraPos);
 		
+		// set the listener's position to the camera's position
+		audioSystem->UpdateListnerPosition(camera.GetPosition(), camera.GetFront());
+
 		playerEntity.myTickCallback(collisionSystem->getWorld(),1);
 
 		//collision
@@ -285,6 +300,14 @@ void DoMovement()
 		//camera.ProcessKeyboard(RIGHT, deltaTime);
 		//playerPos.z += 0.005f;
 		playerEntity.ProcessKeyboard(ENTITY_RIGHT, deltaTime);
+
+	}
+
+	if (keys[GLFW_KEY_SPACE])
+	{
+		// play sound
+		playerEntity.playSound(audioSystem);
+
 	}
 
 	if (keys[GLFW_KEY_UP] || keys[GLFW_KEY_DOWN] || keys[GLFW_KEY_LEFT] || keys[GLFW_KEY_RIGHT])

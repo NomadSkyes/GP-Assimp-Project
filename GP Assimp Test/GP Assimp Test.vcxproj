@@ -89,14 +89,14 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(SolutionDir)/External Libraries/BulletPhysics/include;$(SolutionDir)/External Libraries/assimp;$(SolutionDir)/External Libraries/glew/include;$(SolutionDir)/External Libraries/glm;$(SolutionDir)/External Libraries/SOIL2/include;$(SolutionDir)/External Libraries/glfw/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)/External Libraries/BulletPhysics/include;$(SolutionDir)/External Libraries/assimp;$(SolutionDir)/External Libraries/glew/include;$(SolutionDir)/External Libraries/glm;$(SolutionDir)/External Libraries/SOIL2/include;$(SolutionDir)/External Libraries/glfw/include;$(SolutionDir)/External Libraries/irrKlang-1.6.0/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)/External Libraries/assimp/lib;$(SolutionDir)/External Libraries/glew/lib/Release/Win32;$(SolutionDir)/External Libraries/SOIL2/lib;$(SolutionDir)/External Libraries/glfw/lib-vc2015;$(SolutionDir)/External Libraries/BulletPhysics/lib/Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>assimp-vc140-mt.lib;glew32.lib;glew32s.lib;soil2-debug.lib;opengl32.lib;glfw3.lib;BulletCollision_Debug.lib;BulletDynamics_Debug.lib;LinearMath_Debug.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)/External Libraries/assimp/lib;$(SolutionDir)/External Libraries/glew/lib/Release/Win32;$(SolutionDir)/External Libraries/SOIL2/lib;$(SolutionDir)/External Libraries/glfw/lib-vc2015;$(SolutionDir)/External Libraries/BulletPhysics/lib/Debug;$(SolutionDir)/External Libraries/irrKlang-1.6.0/lib/Win32-visualStudio;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>assimp-vc140-mt.lib;glew32.lib;glew32s.lib;soil2-debug.lib;opengl32.lib;glfw3.lib;BulletCollision_Debug.lib;BulletDynamics_Debug.lib;LinearMath_Debug.lib;irrKlang.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -151,6 +151,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="AudioSystem.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CollisionSystem.h" />
     <ClInclude Include="Entity.h" />
