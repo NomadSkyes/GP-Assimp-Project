@@ -52,6 +52,7 @@ Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 // entities
 Entity playerEntity(glm::vec3(0.0f, 1.0f, 6.0f));
 Entity level01Entity(glm::vec3(0.0f, 0.0f, 0.0f));
+Entity drone01Entity(glm::vec3(0.0f, 0.0f, 0.0f));
 
 bool keys[1024];
 GLfloat lastX = 400, lastY = 300;
@@ -86,6 +87,7 @@ int main()
 	// give the entities a reference to the collision system
 	playerEntity.SetCollisionSystem(collisionSystem);
 	level01Entity.SetCollisionSystem(collisionSystem);
+	drone01Entity.SetCollisionSystem(collisionSystem);
 
 	// give the player entity a reference to the audio system
 	playerEntity.SetAudioSystem(audioSystem);
@@ -99,6 +101,9 @@ int main()
 
 	// player create a rigidbody
 	playerEntity.AddRigidBody(0);
+
+	//adds cylinder rigidbody (1)
+	drone01Entity.AddRigidBody(1);
 
 	// pass the collision system into the level object to create a rigidbody
 	level01Entity.AddMultipleRigidBodies(0.5, 5, 15, -7.5, 0, 0, 0.0);
@@ -162,8 +167,9 @@ int main()
 
 	// Load models
 	// set entity models 
-	level01Entity.SetModel("res/models/debugLVL.obj");
+	level01Entity.SetModel("res/models/ForestFloor.obj");
 	playerEntity.SetModel("res/models/Gladiator.obj");
+	drone01Entity.SetModel("res/models/Drone.obj");
 
 	camera.SetAngle(-65.0f, -90.0f);
 
@@ -212,6 +218,8 @@ int main()
 		// Draw the loaded model
 		glm::mat4 model_a;
 
+		glm::mat4 enemy_1;
+
 		glm::mat4 player_1;
 
 		model_a = glm::translate(model_a, lvl1_aPos); // Translate it down a bit so it's at the center of the scene
@@ -221,6 +229,14 @@ int main()
 		//lvl1_a.Draw(shader);
 		level01Entity.GetModel().Draw(shader);
 
+		enemy_1 = glm::translate(enemy_1, drone01Entity.GetPosition()); // Translate it down a bit so it's at the center of the scene
+		enemy_1 = glm::scale(enemy_1, glm::vec3(1.0f, 1.0f, 1.0f));	// It's a bit too big for our scene, so scale it down
+		enemy_1 = glm::rotate(enemy_1, float(-90 * DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
+		enemy_1 = glm::rotate(enemy_1, float(-drone01Entity.getAngle() * DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(enemy_1));
+		drone01Entity.GetModel().Draw(shader);
+		drone01Entity.LookAt(playerEntity.GetPosition());
+		
 
 		player_1 = glm::translate(player_1, playerEntity.GetPosition()); // Translate it down a bit so it's at the center of the scene
 		player_1 = glm::scale(player_1, glm::vec3(0.1f, 0.1f, 0.1f));	// It's a bit too big for our scene, so scale it down
@@ -274,7 +290,6 @@ void DoMovement()
 		// play sound
 		playerEntity.playSound();
 		playerEntity.Attack();
-
 	}
 
 	if (keys[GLFW_KEY_UP] || keys[GLFW_KEY_DOWN] || keys[GLFW_KEY_LEFT] || keys[GLFW_KEY_RIGHT])
@@ -335,6 +350,7 @@ void DoMovement()
 		{
 			playerEntity.SetAngle(0.0f + 45.0f);
 		}
+
 	}
 	else
 	{

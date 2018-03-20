@@ -16,6 +16,8 @@
 // Audio
 #include "AudioSystem.h"
 
+#define PI 3.14159265
+
 // Defines several possible options for Entity movement. Used as abstraction to stay away from window-system specific input methods
 enum Entity_Movement
 {
@@ -282,6 +284,22 @@ public:
 		}
 	}
 
+	//get angle to point
+	void LookAt(glm::vec3 target)
+	{
+		float dot = (this->position.x*target.x) + (this->position.z*target.z);
+		float det = (this->position.x*target.z) + (this->position.z*target.x);
+		SetAngle(atan2(det, dot) * (180.0 / PI));
+		cout << atan2(det, dot) * (180.0 / PI) << endl;
+
+		//float dot = (this->position.x*target.x) + (this->position.y*target.y) + (this->position.z*target.z);
+		//float lenSq1 = (this->position.x*this->position.x) + (this->position.y*this->position.y) + (this->position.z*this->position.z);
+		//float lenSq2 = (target.x*target.x) + (target.y*target.y) + (target.z*target.z);
+		//float output = acos(dot / sqrt(lenSq1 * lenSq2));
+		//SetAngle(output);
+		
+	}
+
 	// model
 	void SetModel(string path) {
 		if (!path.empty()) {
@@ -307,7 +325,7 @@ private:
 	// model;
 	Model model;
 
-	btScalar mMaxSpeed = 0.25;
+	btScalar mMaxSpeed = 4.0;
 
 	// colliders
 	CollisionSystem* _cs = nullptr;
