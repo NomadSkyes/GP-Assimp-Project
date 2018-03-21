@@ -2,9 +2,10 @@
 
 #include <btBulletDynamicsCommon.h>
 #include <vector>
+#include<iostream>
 using namespace std;
 
-#include "Model.h"
+
 
 class CollisionSystem {
 private:

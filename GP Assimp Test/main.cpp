@@ -14,8 +14,11 @@
 // GL includes
 #include "Shader.h"
 #include "Camera.h"
+
+// other
 #include "Entity.h"
 #include "Model.h"
+#include "EntityFactory.h"
 
 // GLM Mathemtics
 #include <glm/glm.hpp>
@@ -49,10 +52,8 @@ void DoMovement();
 // Camera
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
 
-// entities
-Entity playerEntity(glm::vec3(0.0f, 1.0f, 6.0f));
-Entity level01Entity(glm::vec3(0.0f, 0.0f, 0.0f));
-Entity drone01Entity(glm::vec3(0.0f, 0.0f, 0.0f));
+// create the EntityFactory
+EntityFactory* _entFactory;
 
 bool keys[1024];
 GLfloat lastX = 400, lastY = 300;
@@ -62,13 +63,6 @@ GLfloat deltaTime = 0.0f;
 GLfloat lastFrame = 0.0f;
 
 glm::vec3 cameraModifier(0.0f, 0.0f, 0.0f);
-
-//Level Model Positions
-glm::vec3 lvl1_aPos(0.0f, 0.0f, 0.0f);
-glm::vec3 lvl1_bPos(16.0f, 0.0f, 0.0f);
-glm::vec3 lvl1_cPos(16.0f, 0.0f, -16.0f);
-glm::vec3 lvl1_dPos(0.0f, 0.0f, -16.0f);
-
 
 //player & player camera positions
 glm::vec3 playerCameraPos;
@@ -82,38 +76,14 @@ int main()
 	// init bullet physics
 	collisionSystem = new CollisionSystem();
 
-	
-
-	// give the entities a reference to the collision system
-	playerEntity.SetCollisionSystem(collisionSystem);
-	level01Entity.SetCollisionSystem(collisionSystem);
-	drone01Entity.SetCollisionSystem(collisionSystem);
-
-	// give the player entity a reference to the audio system
-	playerEntity.SetAudioSystem(audioSystem);
+	// create the EntityFactory
+	_entFactory = new EntityFactory();
+	_entFactory->SetUp(audioSystem, collisionSystem);
 
 
 	// set the listener's position to the camera's position
 	audioSystem->UpdateListnerPosition(camera.GetPosition(), camera.GetFront());
 
-	// give the player entity a sound
-	playerEntity.setSound("res/audio/explosion.wav");
-
-	// player create a rigidbody
-	playerEntity.AddRigidBody(0);
-
-	//adds cylinder rigidbody (1)
-	drone01Entity.AddRigidBody(1);
-
-	// pass the collision system into the level object to create a rigidbody
-	level01Entity.AddMultipleRigidBodies(0.5, 5, 15, -7.5, 0, 0, 0.0);
-	level01Entity.AddMultipleRigidBodies(0.5, 5, 15, 7.5, 0, 0, 0.0);
-	level01Entity.AddMultipleRigidBodies(15, 5, 0.5, 0, 0, -7.5, 0.0);
-	level01Entity.AddMultipleRigidBodies(15, 5, 0.5, 0, 0, 7.5, 0.0);
-	level01Entity.AddMultipleRigidBodies(2.5, 5, 2.5, 0, 0, 0, 0.0);
-
-	// add collision plane
-	btRigidBody* plane = collisionSystem->AddPlane();
 
 	// Init GLFW
 	glfwInit();
@@ -156,6 +126,7 @@ int main()
 		return EXIT_FAILURE;
 	}
 
+
 	// Define the viewport dimensions
 	glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
@@ -165,11 +136,13 @@ int main()
 	// Setup and compile our shaders
 	Shader shader("res/shaders/modelLoading.vs", "res/shaders/modelLoading.frag");
 
-	// Load models
-	// set entity models 
-	level01Entity.SetModel("res/models/ForestFloor.obj");
-	playerEntity.SetModel("res/models/Gladiator.obj");
-	drone01Entity.SetModel("res/models/Drone.obj");
+
+	// create the entities
+	_entFactory->CreateEntity(0);
+	_entFactory->CreateEntity(1);
+	_entFactory->CreateEntity(2);
+	_entFactory->CreateEntity(3);
+
 
 	camera.SetAngle(-65.0f, -90.0f);
 
@@ -182,15 +155,15 @@ int main()
 	while (!glfwWindowShouldClose(window))
 	{
 		//fixes camera on player
-		playerCameraPos.x = playerEntity.GetPosition().x + cameraModifier.x;
+		playerCameraPos.x = _entFactory->GetPlayer().GetPosition().x + cameraModifier.x;
 		playerCameraPos.y = 10.0f;
-		playerCameraPos.z = playerEntity.GetPosition().z + 5 + cameraModifier.z;
+		playerCameraPos.z = _entFactory->GetPlayer().GetPosition().z + 5 + cameraModifier.z;
 		camera.SetPosition(playerCameraPos);
 		
 		// set the listener's position to the camera's position
 		audioSystem->UpdateListnerPosition(camera.GetPosition(), camera.GetFront());
 
-		playerEntity.myTickCallback(collisionSystem->getWorld(),1);
+		_entFactory->GetPlayer().myTickCallback(collisionSystem->getWorld(),1);
 
 		//collision
 		collisionSystem->StepSimulation(1 / 60.0);	// step the physics simulation (default 1/60 seconds)
@@ -217,34 +190,43 @@ int main()
 
 		// Draw the loaded model
 		glm::mat4 model_a;
+		glm::mat4 model_b;
 
 		glm::mat4 enemy_1;
 
 		glm::mat4 player_1;
 
-		model_a = glm::translate(model_a, lvl1_aPos); // Translate it down a bit so it's at the center of the scene
+		
+
+		model_a = glm::translate(model_a, _entFactory->GetLevel_01().GetPosition()); // Translate it down a bit so it's at the center of the scene
 		model_a = glm::scale(model_a, glm::vec3(1.0f, 1.0f, 1.0f));	// It's a bit too big for our scene, so scale it down
 		//model_a = glm::rotate(model_a, float(-90 * DEG_TO_RADIAN), glm::vec3(1.0f, 0.0f, 0.0f));
 		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model_a));
 		//lvl1_a.Draw(shader);
-		level01Entity.GetModel().Draw(shader);
+		_entFactory->GetLevel_01().GetModel().Draw(shader);
 
-		enemy_1 = glm::translate(enemy_1, drone01Entity.GetPosition()); // Translate it down a bit so it's at the center of the scene
+		model_b = glm::translate(model_b, _entFactory->GetLevel_02().GetPosition()); // Translate it down a bit so it's at the center of the scene
+		model_b = glm::scale(model_b, glm::vec3(1.0f, 1.0f, 1.0f));	// It's a bit too big for our scene, so scale it down
+		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model_b));
+		_entFactory->GetLevel_02().GetModel().Draw(shader);
+
+		
+		enemy_1 = glm::translate(enemy_1, _entFactory->GetDrone().GetPosition()); // Translate it down a bit so it's at the center of the scene
 		enemy_1 = glm::scale(enemy_1, glm::vec3(1.0f, 1.0f, 1.0f));	// It's a bit too big for our scene, so scale it down
 		enemy_1 = glm::rotate(enemy_1, float(-90 * DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
-		enemy_1 = glm::rotate(enemy_1, float(-drone01Entity.getAngle() * DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
+		enemy_1 = glm::rotate(enemy_1, float(-_entFactory->GetDrone().getAngle() * DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(enemy_1));
-		drone01Entity.GetModel().Draw(shader);
-		drone01Entity.LookAt(playerEntity.GetPosition());
+		_entFactory->GetDrone().GetModel().Draw(shader);
+		_entFactory->GetDrone().LookAt(_entFactory->GetPlayer().GetPosition());
 		
-
-		player_1 = glm::translate(player_1, playerEntity.GetPosition()); // Translate it down a bit so it's at the center of the scene
-		player_1 = glm::scale(player_1, glm::vec3(0.1f, 0.1f, 0.1f));	// It's a bit too big for our scene, so scale it down
-		player_1 = glm::rotate(player_1, float(playerEntity.getAngle() * DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(player_1));
-		//player.Draw(shader);
-		playerEntity.GetModel().Draw(shader);
-
+		if (_entFactory->GetPlayer().IsAlive()) {
+			player_1 = glm::translate(player_1, _entFactory->GetPlayer().GetPosition()); // Translate it down a bit so it's at the center of the scene
+			player_1 = glm::scale(player_1, glm::vec3(0.1f, 0.1f, 0.1f));	// It's a bit too big for our scene, so scale it down
+			player_1 = glm::rotate(player_1, float(_entFactory->GetPlayer().getAngle() * DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
+			glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(player_1));
+			//player.Draw(shader);
+			_entFactory->GetPlayer().GetModel().Draw(shader);
+		}
 
 		// Swap the buffers
 		glfwSwapBuffers(window);
@@ -260,43 +242,49 @@ void DoMovement()
 	// Camera controls
 	if (!keys[GLFW_KEY_W] && !keys[GLFW_KEY_S] && !keys[GLFW_KEY_A] && !keys[GLFW_KEY_D])
 	{
-		playerEntity.Stop();
+		_entFactory->GetPlayer().Stop();
 	}
 
 	if (keys[GLFW_KEY_W])
 	{
-		playerEntity.ProcessKeyboard(ENTITY_UP, deltaTime);
+		_entFactory->GetPlayer().ProcessKeyboard(ENTITY_UP, deltaTime);
 	}
 		
 
 	if (keys[GLFW_KEY_S])
 	{
-		playerEntity.ProcessKeyboard(ENTITY_DOWN, deltaTime);
+		_entFactory->GetPlayer().ProcessKeyboard(ENTITY_DOWN, deltaTime);
 	}
 
 	if (keys[GLFW_KEY_A])
 	{
-		playerEntity.ProcessKeyboard(ENTITY_LEFT, deltaTime);
+		_entFactory->GetPlayer().ProcessKeyboard(ENTITY_LEFT, deltaTime);
 	}
 
 	if (keys[GLFW_KEY_D])
 	{
-		playerEntity.ProcessKeyboard(ENTITY_RIGHT, deltaTime);
+		_entFactory->GetPlayer().ProcessKeyboard(ENTITY_RIGHT, deltaTime);
 
 	}
 
 	if (keys[GLFW_KEY_SPACE])
 	{
 		// play sound
-		playerEntity.playSound();
-		playerEntity.Attack();
+		_entFactory->GetPlayer().playSound();
+		_entFactory->GetPlayer().Attack();
 	}
+	if (keys[GLFW_KEY_ENTER])
+	{
+		// kill player
+		_entFactory->GetPlayer().Kill();
+	}
+	
 
 	if (keys[GLFW_KEY_UP] || keys[GLFW_KEY_DOWN] || keys[GLFW_KEY_LEFT] || keys[GLFW_KEY_RIGHT])
 	{
 		if (keys[GLFW_KEY_UP])
 		{
-			playerEntity.SetAngle(180.0f);
+			_entFactory->GetPlayer().SetAngle(180.0f);
 			if (cameraModifier.z > -1.0f)
 			{
 				cameraModifier.z -= 0.1f;
@@ -305,7 +293,7 @@ void DoMovement()
 
 		if (keys[GLFW_KEY_DOWN])
 		{
-			playerEntity.SetAngle(0.0f);
+			_entFactory->GetPlayer().SetAngle(0.0f);
 			if (cameraModifier.z < 1.0f)
 			{
 				cameraModifier.z += 0.1f;
@@ -314,7 +302,7 @@ void DoMovement()
 
 		if (keys[GLFW_KEY_LEFT])
 		{
-			playerEntity.SetAngle(-90.0f);
+			_entFactory->GetPlayer().SetAngle(-90.0f);
 			if (cameraModifier.x > -1.0f)
 			{
 				cameraModifier.x -= 0.1f;
@@ -323,7 +311,7 @@ void DoMovement()
 
 		if (keys[GLFW_KEY_RIGHT])
 		{
-			playerEntity.SetAngle(90.0f);
+			_entFactory->GetPlayer().SetAngle(90.0f);
 			if (cameraModifier.x < 1.0f)
 			{
 				cameraModifier.x += 0.1f;
@@ -332,23 +320,23 @@ void DoMovement()
 
 		if (keys[GLFW_KEY_UP] && keys[GLFW_KEY_LEFT])
 		{
-			playerEntity.SetAngle(180.0f + 45.0f);
+			_entFactory->GetPlayer().SetAngle(180.0f + 45.0f);
 
 		}
 
 		if (keys[GLFW_KEY_DOWN] && keys[GLFW_KEY_LEFT])
 		{
-			playerEntity.SetAngle(0.0f - 45.0f);
+			_entFactory->GetPlayer().SetAngle(0.0f - 45.0f);
 		}
 
 		if (keys[GLFW_KEY_UP] && keys[GLFW_KEY_RIGHT])
 		{
-			playerEntity.SetAngle(180.0f - 45.0f);
+			_entFactory->GetPlayer().SetAngle(180.0f - 45.0f);
 		}
 
 		if (keys[GLFW_KEY_DOWN] && keys[GLFW_KEY_RIGHT])
 		{
-			playerEntity.SetAngle(0.0f + 45.0f);
+			_entFactory->GetPlayer().SetAngle(0.0f + 45.0f);
 		}
 
 	}

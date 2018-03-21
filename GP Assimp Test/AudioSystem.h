@@ -14,7 +14,7 @@ private:
 
 	//map<string, irrklang::ISoundSource*> soundSources;
 	//std::map<string, irrklang::ISoundSource*>::iterator it;
-
+	vector<ISoundSource*> sources;
 public:
 	ISoundEngine* engine;
 	AudioSystem() {
@@ -67,6 +67,7 @@ public:
 			const char* _tmpChar = path.c_str();
 			ISoundSource* _source = engine->addSoundSourceFromFile(_tmpChar);
 			_source->setDefaultVolume(_volume);
+			sources.push_back(_source);
 			//soundSources[_name] = _source;
 			return _source;
 		}

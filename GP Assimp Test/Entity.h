@@ -4,7 +4,7 @@
 #include <vector>
 
 // GL Includes
-#define GLEW_STATIC
+//#define GLEW_STATIC
 #include <GL/glew.h>
 
 #include <glm/glm.hpp>
@@ -15,6 +15,9 @@
 
 // Audio
 #include "AudioSystem.h"
+
+// other
+#include "Model.h"
 
 #define PI 3.14159265
 
@@ -27,35 +30,16 @@ enum Entity_Movement
 	ENTITY_RIGHT
 };
 
-// Default Entity values
-const GLfloat ENTITY_YAW = -90.0f;
-const GLfloat ENTITY_PITCH = 0.0f;
-const GLfloat ENTITY_SPEED = 4.0f;
-
-
 
 // An abstract Entity class that processes input and calculates the corresponding Eular Angles, Vectors and Matrices for use in OpenGL
 class Entity
 {
 public:
-	// Constructor with vectors
-	Entity(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), GLfloat yaw = ENTITY_YAW, GLfloat pitch = ENTITY_PITCH) : front(glm::vec3(0.0f, 0.0f, -1.0f)), movementSpeed(ENTITY_SPEED)
-	{
-		this->position = position;
-		this->worldUp = up;
-		this->yaw = yaw;
-		this->pitch = pitch;
-		this->updateEntityVectors();
-	}
 
-	// Constructor with scalar values
-	Entity(GLfloat posX, GLfloat posY, GLfloat posZ, GLfloat upX, GLfloat upY, GLfloat upZ, GLfloat yaw, GLfloat pitch) : front(glm::vec3(0.0f, 0.0f, -1.0f)), movementSpeed(ENTITY_SPEED)
-	{
-		this->position = glm::vec3(posX, posY, posZ);
-		this->worldUp = glm::vec3(upX, upY, upZ);
-		this->yaw = yaw;
-		this->pitch = pitch;
-		this->updateEntityVectors();
+	~Entity() {
+		//delete(this->model);
+		//delete(this->testSound);
+		//delete(this->_rb);
 	}
 
 	// Returns the view matrix calculated using Eular Angles and the LookAt Matrix
@@ -64,54 +48,25 @@ public:
 		return glm::lookAt(this->position, this->position + this->front, this->up);
 	}
 
-	// Processes input received from any keyboard-like input system. Accepts input parameter in the form of Entity defined ENUM (to abstract it from windowing systems)
-	void ProcessKeyboard(Entity_Movement direction, GLfloat deltaTime)
-	{
-		//GLfloat velocity = this->movementSpeed * deltaTime;
-		GLfloat velocity = this->movementSpeed;
-
-		if (direction == ENTITY_UP)
-		{
-			//this->position += this->front * velocity;
-
-			glm::vec3 movementVector = this->front * velocity;
-			SetPosition(movementVector);
-		}
-
-		if (direction == ENTITY_DOWN)
-		{
-			//this->position -= this->front * velocity;
-			glm::vec3 movementVector = -this->front * velocity;
-			SetPosition(movementVector);
-
-		}
-
-		if (direction == ENTITY_LEFT)
-		{
-			//this->position -= this->right * velocity;
-			glm::vec3 movementVector = -this->right * velocity;
-			SetPosition(movementVector);
-
-		}
-
-		if (direction == ENTITY_RIGHT)
-		{
-			//this->position += this->right * velocity;
-			glm::vec3 movementVector = this->right * velocity;
-			SetPosition(movementVector);
-
-		}
-	}
+	
 
 
 	glm::vec3 GetPosition()
 	{
 		if (_cs != nullptr) {
-			btTransform trans;
-			_rb->getMotionState()->getWorldTransform(trans);
-			glm::vec3 updatedPos(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
-			this->position = updatedPos;
-			return this->position;
+			// check to see if the object uses one, or multiple, rigidbodies
+			if (_rb != nullptr) {
+				// return the position of the rigidbody
+				btTransform trans;
+				_rb->getMotionState()->getWorldTransform(trans);
+				glm::vec3 updatedPos(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
+				this->position = updatedPos;
+				return this->position;
+			}
+			else {
+				// return the position of the entity
+				return this->position;
+			}
 		}
 		else {
 			cout << "no CollisionSystem reference! (1)" << endl;
@@ -137,13 +92,15 @@ public:
 
 	void myTickCallback(btDynamicsWorld *world, btScalar timeStep) {
 		if (_cs != nullptr) {
-			// mShipBody is the spaceship's btRigidBody
-			btVector3 velocity = _rb->getLinearVelocity();
-			btScalar speed = velocity.length();
-			if (speed > mMaxSpeed) {
-				velocity *= mMaxSpeed / speed;
-				if (_rb != nullptr) {
-					_rb->setLinearVelocity(velocity);
+			if (_rb != nullptr) {
+				// mShipBody is the spaceship's btRigidBody
+				btVector3 velocity = _rb->getLinearVelocity();
+				btScalar speed = velocity.length();
+				if (speed > mMaxSpeed) {
+					velocity *= mMaxSpeed / speed;
+					if (_rb != nullptr) {
+						_rb->setLinearVelocity(velocity);
+					}
 				}
 			}
 		}
@@ -155,18 +112,59 @@ public:
 
 	void Attack()
 	{
-		// shoot raycast
-		btVector3 pos(this->position.x, this->position.y, this->position.z);
-		btVector3 dest(this->front.x, this->front.y, this->front.z);
+		if (isAlive) {
+			// shoot raycast
+			btVector3 pos(this->position.x, this->position.y, this->position.z);
+			btVector3 dest(this->front.x, this->front.y, this->front.z);
 
-		if (_rb != nullptr || _cs != nullptr) {
-			//_cs->ShootRaycast(pos, (dest * 2));
-			_cs->ShootRaycast(pos, dest);
+			if (_rb != nullptr || _cs != nullptr) {
+				//_cs->ShootRaycast(pos, (dest * 2));
+				_cs->ShootRaycast(pos, dest);
+			}
+			else {
+				cout << "no CollisionSystem reference! (4)" << endl;
+			}
 		}
-		else {
-			cout << "no CollisionSystem reference! (4)" << endl;
-		}
+	}
+	// Processes input received from any keyboard-like input system. Accepts input parameter in the form of Entity defined ENUM (to abstract it from windowing systems)
+	void ProcessKeyboard(Entity_Movement direction, GLfloat deltaTime)
+	{
+		if (isAlive) {
+			//GLfloat velocity = this->movementSpeed * deltaTime;
+			GLfloat velocity = this->movementSpeed;
 
+			if (direction == ENTITY_UP)
+			{
+				//this->position += this->front * velocity;
+
+				glm::vec3 movementVector = this->front * velocity;
+				SetPosition(movementVector);
+			}
+
+			if (direction == ENTITY_DOWN)
+			{
+				//this->position -= this->front * velocity;
+				glm::vec3 movementVector = -this->front * velocity;
+				SetPosition(movementVector);
+
+			}
+
+			if (direction == ENTITY_LEFT)
+			{
+				//this->position -= this->right * velocity;
+				glm::vec3 movementVector = -this->right * velocity;
+				SetPosition(movementVector);
+
+			}
+
+			if (direction == ENTITY_RIGHT)
+			{
+				//this->position += this->right * velocity;
+				glm::vec3 movementVector = this->right * velocity;
+				SetPosition(movementVector);
+
+			}
+		}
 	}
 
 	void SetPosition(glm::vec3 newPos)
@@ -202,6 +200,7 @@ public:
 			cout << "no CollisionSystem reference! (5)" << endl;
 		}
 	}
+	
 
 	void AddRigidBody(int type) {
 		if (_cs != nullptr) {
@@ -230,7 +229,7 @@ public:
 	// add multiple rigidbodies to an object
 	void AddMultipleRigidBodies(float dx, float dy, float dz, float posx, float posy, float posz, float mass) {
 		if (_cs != nullptr) {
-			btRigidBody* _mRb = _cs->AddCube(dx, dz, dz, posx, posy, posz, mass);
+			btRigidBody* _mRb = _cs->AddCube(dx, dy, dz, posx, posy, posz, mass);
 			_multiRb.push_back(_mRb);
 		}
 		else {
@@ -240,7 +239,7 @@ public:
 
 
 	// pass through a pointer to the collision system
-	void SetCollisionSystem(CollisionSystem* cs) {
+	void SetCollisionSystem(CollisionSystem *cs) {
 		this->_cs = cs;
 	}
 
@@ -266,11 +265,13 @@ public:
 	}
 	// add sound source
 	void setSound(string path) {
-		if (_as != nullptr) {
-			testSound = _as->AddSoundSource(path, 1);
-		}
-		else {
-			cout << "no AudioSystem reference! (1)" << endl;
+		if (!path.empty()) {
+			if (_as != nullptr) {
+				testSound = _as->AddSoundSource(path, 1);
+			}
+			else {
+				cout << "no AudioSystem reference! (1)" << endl;
+			}
 		}
 	}
 
@@ -313,14 +314,25 @@ public:
 		return this->model;
 	}
 
+	// kill the entity
+	void Kill() {
+		this->isAlive = false;
+		delete(this);
+	}
 
-private:
+	bool IsAlive() {
+		return this->isAlive;
+	}
+
+protected:
 	// Entity Attributes
 	glm::vec3 position;
 	glm::vec3 front;
 	glm::vec3 up;
 	glm::vec3 right;
 	glm::vec3 worldUp;
+
+	float isAlive = true;
 
 	// model;
 	Model model;
