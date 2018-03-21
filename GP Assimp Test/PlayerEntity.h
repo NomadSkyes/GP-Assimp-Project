@@ -21,6 +21,19 @@ public:
 		SetUpModel();
 	}
 
+	void SetAngle(float newPitch)
+	{
+		this->pitch = newPitch;
+		cout << "inputted angle " << newPitch << endl;
+		cout << "current angle " << this->pitch << endl;
+		
+	}
+
+	float getAngle()
+	{
+		//cout << "work! " << this->pitch << endl;
+		return this->pitch;
+	}
 
 private:
 	// Set starting position

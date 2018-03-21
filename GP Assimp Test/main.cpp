@@ -220,6 +220,8 @@ int main()
 		_entFactory->GetDrone().LookAt(_entFactory->GetPlayer().GetPosition());
 		
 		if (_entFactory->GetPlayer().IsAlive()) {
+			float test = _entFactory->GetPlayer().getAngle();
+			//cout << test << endl;
 			player_1 = glm::translate(player_1, _entFactory->GetPlayer().GetPosition()); // Translate it down a bit so it's at the center of the scene
 			player_1 = glm::scale(player_1, glm::vec3(0.1f, 0.1f, 0.1f));	// It's a bit too big for our scene, so scale it down
 			player_1 = glm::rotate(player_1, float(_entFactory->GetPlayer().getAngle() * DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
@@ -239,117 +241,122 @@ int main()
 // Moves/alters the camera positions based on user input
 void DoMovement()
 {
-	// Camera controls
-	if (!keys[GLFW_KEY_W] && !keys[GLFW_KEY_S] && !keys[GLFW_KEY_A] && !keys[GLFW_KEY_D])
-	{
-		_entFactory->GetPlayer().Stop();
-	}
+	if (_entFactory->GetPlayer().IsAlive()) {
+		// Camera controls
+		if (!keys[GLFW_KEY_W] && !keys[GLFW_KEY_S] && !keys[GLFW_KEY_A] && !keys[GLFW_KEY_D])
+		{
+			_entFactory->GetPlayer().Stop();
+		}
 
-	if (keys[GLFW_KEY_W])
-	{
-		_entFactory->GetPlayer().ProcessKeyboard(ENTITY_UP, deltaTime);
-	}
+		if (keys[GLFW_KEY_W])
+		{
+			_entFactory->GetPlayer().ProcessKeyboard(ENTITY_UP, deltaTime);
+		}
+
+
+		if (keys[GLFW_KEY_S])
+		{
+			_entFactory->GetPlayer().ProcessKeyboard(ENTITY_DOWN, deltaTime);
+		}
+
+		if (keys[GLFW_KEY_A])
+		{
+			_entFactory->GetPlayer().ProcessKeyboard(ENTITY_LEFT, deltaTime);
+		}
+
+		if (keys[GLFW_KEY_D])
+		{
+			_entFactory->GetPlayer().ProcessKeyboard(ENTITY_RIGHT, deltaTime);
+
+		}
+
+		if (keys[GLFW_KEY_SPACE])
+		{
+			// play sound
+			_entFactory->GetPlayer().playSound();
+			_entFactory->GetPlayer().Attack();
+		}
 		
 
-	if (keys[GLFW_KEY_S])
-	{
-		_entFactory->GetPlayer().ProcessKeyboard(ENTITY_DOWN, deltaTime);
-	}
 
-	if (keys[GLFW_KEY_A])
-	{
-		_entFactory->GetPlayer().ProcessKeyboard(ENTITY_LEFT, deltaTime);
-	}
+		if (keys[GLFW_KEY_UP] || keys[GLFW_KEY_DOWN] || keys[GLFW_KEY_LEFT] || keys[GLFW_KEY_RIGHT])
+		{
+			if (keys[GLFW_KEY_UP])
+			{
+				_entFactory->GetPlayer().SetAngle(180.0f);
+				
+				if (cameraModifier.z > -1.0f)
+				{
+					cameraModifier.z -= 0.1f;
+				}
+			}
 
-	if (keys[GLFW_KEY_D])
-	{
-		_entFactory->GetPlayer().ProcessKeyboard(ENTITY_RIGHT, deltaTime);
+			if (keys[GLFW_KEY_DOWN])
+			{
+				_entFactory->GetPlayer().SetAngle(0.0f);
+				if (cameraModifier.z < 1.0f)
+				{
+					cameraModifier.z += 0.1f;
+				}
+			}
 
-	}
+			if (keys[GLFW_KEY_LEFT])
+			{
+				_entFactory->GetPlayer().SetAngle(-90.0f);
+				if (cameraModifier.x > -1.0f)
+				{
+					cameraModifier.x -= 0.1f;
+				}
+			}
 
-	if (keys[GLFW_KEY_SPACE])
-	{
-		// play sound
-		_entFactory->GetPlayer().playSound();
-		_entFactory->GetPlayer().Attack();
+			if (keys[GLFW_KEY_RIGHT])
+			{
+				_entFactory->GetPlayer().SetAngle(90.0f);
+				if (cameraModifier.x < 1.0f)
+				{
+					cameraModifier.x += 0.1f;
+				}
+			}
+
+			if (keys[GLFW_KEY_UP] && keys[GLFW_KEY_LEFT])
+			{
+				_entFactory->GetPlayer().SetAngle(180.0f + 45.0f);
+
+			}
+
+			if (keys[GLFW_KEY_DOWN] && keys[GLFW_KEY_LEFT])
+			{
+				_entFactory->GetPlayer().SetAngle(0.0f - 45.0f);
+			}
+
+			if (keys[GLFW_KEY_UP] && keys[GLFW_KEY_RIGHT])
+			{
+				_entFactory->GetPlayer().SetAngle(180.0f - 45.0f);
+			}
+
+			if (keys[GLFW_KEY_DOWN] && keys[GLFW_KEY_RIGHT])
+			{
+				_entFactory->GetPlayer().SetAngle(0.0f + 45.0f);
+			}
+			std::cerr << "Final angle at end of keyboard-handling is " << _entFactory->GetPlayer().getAngle() << "\n";
+		}
+		else
+		{
+			if (cameraModifier.x > 0)
+				cameraModifier.x -= 0.1f;
+			if (cameraModifier.x < 0)
+				cameraModifier.x += 0.1f;
+			if (cameraModifier.z > 0)
+				cameraModifier.z -= 0.1f;
+			if (cameraModifier.z < 0)
+				cameraModifier.z += 0.1f;
+		}
 	}
 	if (keys[GLFW_KEY_ENTER])
 	{
 		// kill player
+		cout << "killing" << endl;
 		_entFactory->GetPlayer().Kill();
-	}
-	
-
-	if (keys[GLFW_KEY_UP] || keys[GLFW_KEY_DOWN] || keys[GLFW_KEY_LEFT] || keys[GLFW_KEY_RIGHT])
-	{
-		if (keys[GLFW_KEY_UP])
-		{
-			_entFactory->GetPlayer().SetAngle(180.0f);
-			if (cameraModifier.z > -1.0f)
-			{
-				cameraModifier.z -= 0.1f;
-			}
-		}
-
-		if (keys[GLFW_KEY_DOWN])
-		{
-			_entFactory->GetPlayer().SetAngle(0.0f);
-			if (cameraModifier.z < 1.0f)
-			{
-				cameraModifier.z += 0.1f;
-			}
-		}
-
-		if (keys[GLFW_KEY_LEFT])
-		{
-			_entFactory->GetPlayer().SetAngle(-90.0f);
-			if (cameraModifier.x > -1.0f)
-			{
-				cameraModifier.x -= 0.1f;
-			}
-		}
-
-		if (keys[GLFW_KEY_RIGHT])
-		{
-			_entFactory->GetPlayer().SetAngle(90.0f);
-			if (cameraModifier.x < 1.0f)
-			{
-				cameraModifier.x += 0.1f;
-			}
-		}
-
-		if (keys[GLFW_KEY_UP] && keys[GLFW_KEY_LEFT])
-		{
-			_entFactory->GetPlayer().SetAngle(180.0f + 45.0f);
-
-		}
-
-		if (keys[GLFW_KEY_DOWN] && keys[GLFW_KEY_LEFT])
-		{
-			_entFactory->GetPlayer().SetAngle(0.0f - 45.0f);
-		}
-
-		if (keys[GLFW_KEY_UP] && keys[GLFW_KEY_RIGHT])
-		{
-			_entFactory->GetPlayer().SetAngle(180.0f - 45.0f);
-		}
-
-		if (keys[GLFW_KEY_DOWN] && keys[GLFW_KEY_RIGHT])
-		{
-			_entFactory->GetPlayer().SetAngle(0.0f + 45.0f);
-		}
-
-	}
-	else
-	{
-		if (cameraModifier.x > 0)
-			cameraModifier.x -= 0.1f;
-		if (cameraModifier.x < 0)
-			cameraModifier.x += 0.1f;
-		if (cameraModifier.z > 0)
-			cameraModifier.z -= 0.1f;
-		if (cameraModifier.z < 0)
-			cameraModifier.z += 0.1f;
 	}
 }
 
