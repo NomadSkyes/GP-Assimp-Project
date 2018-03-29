@@ -65,7 +65,8 @@ public:
 			}
 			else {
 				// return the position of the entity
-				return this->position;
+				glm::vec3 tmp = this->position;
+				return tmp;
 			}
 		}
 		else {
@@ -239,7 +240,7 @@ public:
 
 
 	// pass through a pointer to the collision system
-	void SetCollisionSystem(CollisionSystem *cs) {
+	void SetCollisionSystem(CollisionSystem *& cs) {
 		this->_cs = cs;
 	}
 
@@ -251,9 +252,10 @@ public:
 
 	// audio
 	// pass through a pointer to the audio system
-	void SetAudioSystem(AudioSystem* as) {
+	void SetAudioSystem(AudioSystem *& as) {
 		this->_as = as;
 	}
+
 	// add sound source
 	void setSound(string path) {
 		if (!path.empty()) {
@@ -309,7 +311,7 @@ protected:
 	btScalar mMaxSpeed = 4.0;
 
 	// colliders
-	CollisionSystem* _cs = nullptr;
+	CollisionSystem *_cs;
 	btRigidBody* _rb; 
 	vector<btRigidBody*> _multiRb;
 

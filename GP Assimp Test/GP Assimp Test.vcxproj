@@ -23,7 +23,7 @@
     <ProjectGuid>{97D9AD0B-ED2E-4237-A3C4-94217E7C8AFE}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>GPAssimpTest</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
     <ProjectName>Super Battle Arena!</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

@@ -155,15 +155,15 @@ int main()
 	while (!glfwWindowShouldClose(window))
 	{
 		//fixes camera on player
-		playerCameraPos.x = _entFactory->GetPlayer().GetPosition().x + cameraModifier.x;
+		playerCameraPos.x = _entFactory->GetPlayer()->GetPosition().x + cameraModifier.x;
 		playerCameraPos.y = 10.0f;
-		playerCameraPos.z = _entFactory->GetPlayer().GetPosition().z + 5 + cameraModifier.z;
+		playerCameraPos.z = _entFactory->GetPlayer()->GetPosition().z + 5 + cameraModifier.z;
 		camera.SetPosition(playerCameraPos);
 		
 		// set the listener's position to the camera's position
 		audioSystem->UpdateListnerPosition(camera.GetPosition(), camera.GetFront());
 
-		_entFactory->GetPlayer().myTickCallback(collisionSystem->getWorld(),1);
+		_entFactory->GetPlayer()->myTickCallback(collisionSystem->getWorld(),1);
 
 		//collision
 		collisionSystem->StepSimulation(1 / 60.0);	// step the physics simulation (default 1/60 seconds)
@@ -198,36 +198,36 @@ int main()
 
 		
 
-		model_a = glm::translate(model_a, _entFactory->GetLevel_01().GetPosition()); // Translate it down a bit so it's at the center of the scene
+		model_a = glm::translate(model_a, _entFactory->GetLevel_01()->GetPosition()); // Translate it down a bit so it's at the center of the scene
 		model_a = glm::scale(model_a, glm::vec3(1.0f, 1.0f, 1.0f));	// It's a bit too big for our scene, so scale it down
 		//model_a = glm::rotate(model_a, float(-90 * DEG_TO_RADIAN), glm::vec3(1.0f, 0.0f, 0.0f));
 		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model_a));
 		//lvl1_a.Draw(shader);
-		_entFactory->GetLevel_01().GetModel().Draw(shader);
+		_entFactory->GetLevel_01()->GetModel().Draw(shader);
 
-		model_b = glm::translate(model_b, _entFactory->GetLevel_02().GetPosition()); // Translate it down a bit so it's at the center of the scene
+		model_b = glm::translate(model_b, _entFactory->GetLevel_02()->GetPosition()); // Translate it down a bit so it's at the center of the scene
 		model_b = glm::scale(model_b, glm::vec3(1.0f, 1.0f, 1.0f));	// It's a bit too big for our scene, so scale it down
 		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model_b));
-		_entFactory->GetLevel_02().GetModel().Draw(shader);
+		_entFactory->GetLevel_02()->GetModel().Draw(shader);
 
 		
-		enemy_1 = glm::translate(enemy_1, _entFactory->GetDrone().GetPosition()); // Translate it down a bit so it's at the center of the scene
+		enemy_1 = glm::translate(enemy_1, _entFactory->GetDrone()->GetPosition()); // Translate it down a bit so it's at the center of the scene
 		enemy_1 = glm::scale(enemy_1, glm::vec3(1.0f, 1.0f, 1.0f));	// It's a bit too big for our scene, so scale it down
 		enemy_1 = glm::rotate(enemy_1, float(-90 * DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
-		enemy_1 = glm::rotate(enemy_1, float(-_entFactory->GetDrone().getAngle() * DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
+		enemy_1 = glm::rotate(enemy_1, float(-_entFactory->GetDrone()->getAngle() * DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(enemy_1));
-		_entFactory->GetDrone().GetModel().Draw(shader);
-		_entFactory->GetDrone().LookAt(_entFactory->GetPlayer().GetPosition());
+		_entFactory->GetDrone()->GetModel().Draw(shader);
+		_entFactory->GetDrone()->LookAt(_entFactory->GetPlayer()->GetPosition());
 		
-		if (_entFactory->GetPlayer().IsAlive()) {
-			float test = _entFactory->GetPlayer().getAngle();
+		if (_entFactory->GetPlayer()->IsAlive()) {
+			float test = _entFactory->GetPlayer()->getAngle();
 			//cout << test << endl;
-			player_1 = glm::translate(player_1, _entFactory->GetPlayer().GetPosition()); // Translate it down a bit so it's at the center of the scene
+			player_1 = glm::translate(player_1, _entFactory->GetPlayer()->GetPosition()); // Translate it down a bit so it's at the center of the scene
 			player_1 = glm::scale(player_1, glm::vec3(0.1f, 0.1f, 0.1f));	// It's a bit too big for our scene, so scale it down
-			player_1 = glm::rotate(player_1, float(_entFactory->GetPlayer().getAngle() * DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
+			player_1 = glm::rotate(player_1, float(_entFactory->GetPlayer()->getAngle() * DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
 			glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(player_1));
 			//player.Draw(shader);
-			_entFactory->GetPlayer().GetModel().Draw(shader);
+			_entFactory->GetPlayer()->GetModel().Draw(shader);
 		}
 
 		// Swap the buffers
@@ -241,40 +241,40 @@ int main()
 // Moves/alters the camera positions based on user input
 void DoMovement()
 {
-	if (_entFactory->GetPlayer().IsAlive()) {
+	if (_entFactory->GetPlayer()->IsAlive()) {
 		// Camera controls
 		if (!keys[GLFW_KEY_W] && !keys[GLFW_KEY_S] && !keys[GLFW_KEY_A] && !keys[GLFW_KEY_D])
 		{
-			_entFactory->GetPlayer().Stop();
+			_entFactory->GetPlayer()->Stop();
 		}
 
 		if (keys[GLFW_KEY_W])
 		{
-			_entFactory->GetPlayer().ProcessKeyboard(ENTITY_UP, deltaTime);
+			_entFactory->GetPlayer()->ProcessKeyboard(ENTITY_UP, deltaTime);
 		}
 
 
 		if (keys[GLFW_KEY_S])
 		{
-			_entFactory->GetPlayer().ProcessKeyboard(ENTITY_DOWN, deltaTime);
+			_entFactory->GetPlayer()->ProcessKeyboard(ENTITY_DOWN, deltaTime);
 		}
 
 		if (keys[GLFW_KEY_A])
 		{
-			_entFactory->GetPlayer().ProcessKeyboard(ENTITY_LEFT, deltaTime);
+			_entFactory->GetPlayer()->ProcessKeyboard(ENTITY_LEFT, deltaTime);
 		}
 
 		if (keys[GLFW_KEY_D])
 		{
-			_entFactory->GetPlayer().ProcessKeyboard(ENTITY_RIGHT, deltaTime);
+			_entFactory->GetPlayer()->ProcessKeyboard(ENTITY_RIGHT, deltaTime);
 
 		}
 
 		if (keys[GLFW_KEY_SPACE])
 		{
 			// play sound
-			_entFactory->GetPlayer().playSound();
-			_entFactory->GetPlayer().Attack();
+			_entFactory->GetPlayer()->playSound();
+			_entFactory->GetPlayer()->Attack();
 		}
 		
 
@@ -283,7 +283,7 @@ void DoMovement()
 		{
 			if (keys[GLFW_KEY_UP])
 			{
-				_entFactory->GetPlayer().SetAngle(180.0f);
+				_entFactory->GetPlayer()->SetAngle(180.0f);
 				
 				if (cameraModifier.z > -1.0f)
 				{
@@ -293,7 +293,7 @@ void DoMovement()
 
 			if (keys[GLFW_KEY_DOWN])
 			{
-				_entFactory->GetPlayer().SetAngle(0.0f);
+				_entFactory->GetPlayer()->SetAngle(0.0f);
 				if (cameraModifier.z < 1.0f)
 				{
 					cameraModifier.z += 0.1f;
@@ -302,7 +302,7 @@ void DoMovement()
 
 			if (keys[GLFW_KEY_LEFT])
 			{
-				_entFactory->GetPlayer().SetAngle(-90.0f);
+				_entFactory->GetPlayer()->SetAngle(-90.0f);
 				if (cameraModifier.x > -1.0f)
 				{
 					cameraModifier.x -= 0.1f;
@@ -311,7 +311,7 @@ void DoMovement()
 
 			if (keys[GLFW_KEY_RIGHT])
 			{
-				_entFactory->GetPlayer().SetAngle(90.0f);
+				_entFactory->GetPlayer()->SetAngle(90.0f);
 				if (cameraModifier.x < 1.0f)
 				{
 					cameraModifier.x += 0.1f;
@@ -320,25 +320,25 @@ void DoMovement()
 
 			if (keys[GLFW_KEY_UP] && keys[GLFW_KEY_LEFT])
 			{
-				_entFactory->GetPlayer().SetAngle(180.0f + 45.0f);
+				_entFactory->GetPlayer()->SetAngle(180.0f + 45.0f);
 
 			}
 
 			if (keys[GLFW_KEY_DOWN] && keys[GLFW_KEY_LEFT])
 			{
-				_entFactory->GetPlayer().SetAngle(0.0f - 45.0f);
+				_entFactory->GetPlayer()->SetAngle(0.0f - 45.0f);
 			}
 
 			if (keys[GLFW_KEY_UP] && keys[GLFW_KEY_RIGHT])
 			{
-				_entFactory->GetPlayer().SetAngle(180.0f - 45.0f);
+				_entFactory->GetPlayer()->SetAngle(180.0f - 45.0f);
 			}
 
 			if (keys[GLFW_KEY_DOWN] && keys[GLFW_KEY_RIGHT])
 			{
-				_entFactory->GetPlayer().SetAngle(0.0f + 45.0f);
+				_entFactory->GetPlayer()->SetAngle(0.0f + 45.0f);
 			}
-			std::cerr << "Final angle at end of keyboard-handling is " << _entFactory->GetPlayer().getAngle() << "\n";
+			std::cerr << "Final angle at end of keyboard-handling is " << _entFactory->GetPlayer()->getAngle() << "\n";
 		}
 		else
 		{
@@ -356,7 +356,7 @@ void DoMovement()
 	{
 		// kill player
 		cout << "killing" << endl;
-		_entFactory->GetPlayer().Kill();
+		_entFactory->GetPlayer()->Kill();
 	}
 }
 

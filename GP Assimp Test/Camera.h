@@ -120,8 +120,9 @@ public:
 		return this->zoom;
 	}
 
-	glm::vec3 GetPosition()
+	glm::vec3 &GetPosition()
 	{
+		 
 		return this->position;
 	}
 

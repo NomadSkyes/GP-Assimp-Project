@@ -36,6 +36,9 @@ public:
 	}
 
 private:
+
+	
+
 	// Set starting position
 	void SetStartPosition() {
 		this->position = glm::vec3(6.0f, 1.0f, 0.0f);
