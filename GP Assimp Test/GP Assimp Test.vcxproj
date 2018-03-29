@@ -158,6 +158,7 @@
     <ClInclude Include="DroneEntity.h" />
     <ClInclude Include="Entity.h" />
     <ClInclude Include="EntityFactory.h" />
+    <ClInclude Include="Game.h" />
     <ClInclude Include="Level_01Entity.h" />
     <ClInclude Include="Level_02Entity.h" />
     <ClInclude Include="Mesh.h" />
@@ -168,6 +169,7 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Game.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

@@ -24,8 +24,7 @@ public:
 	void SetAngle(float newPitch)
 	{
 		this->pitch = newPitch;
-		cout << "inputted angle " << newPitch << endl;
-		cout << "current angle " << this->pitch << endl;
+		
 		
 	}
 
