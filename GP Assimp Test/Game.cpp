@@ -15,9 +15,10 @@ void Game::Init(GLFWwindow* _window) {
 	// init bullet physics
 	collisionSystem = new CollisionSystem();
 
-	// create the EntityFactory
-	_entFactory = new EntityFactory();
-	_entFactory->SetUp(audioSystem, collisionSystem);
+	// create the game manager
+	_gm = new GameManager();
+	
+	_gm->SetUp(audioSystem, collisionSystem);
 
 	// init window
 	this->window = _window;
@@ -85,11 +86,9 @@ int Game::Play(){
 	Shader shader("res/shaders/modelLoading.vs", "res/shaders/modelLoading.frag");
 
 
-	// create the entities
-	_entFactory->CreateEntity(0);
-	_entFactory->CreateEntity(1);
-	_entFactory->CreateEntity(2);
-	_entFactory->CreateEntity(3);
+	
+	// start game
+	_gm->GameBegin();
 
 
 	camera->SetAngle(-65.0f, -90.0f);
@@ -106,15 +105,15 @@ int Game::Play(){
 	while (!glfwWindowShouldClose(window))
 	{
 		//fixes camera on player
-		playerCameraPos.x = _entFactory->GetPlayer()->GetPosition().x + cameraModifier.x;
+		playerCameraPos.x = _gm->GetEntity(0)->GetPosition().x + cameraModifier.x;
 		playerCameraPos.y = 10.0f;
-		playerCameraPos.z = _entFactory->GetPlayer()->GetPosition().z + 5 + cameraModifier.z;
+		playerCameraPos.z = _gm->GetEntity(0)->GetPosition().z + 5 + cameraModifier.z;
 		camera->SetPosition(playerCameraPos);
 
 		// set the listener's position to the camera's position
 		audioSystem->UpdateListnerPosition(camera->GetPosition(), camera->GetFront());
 
-		_entFactory->GetPlayer()->myTickCallback(collisionSystem->getWorld(), 1);
+		_gm->GetEntity(0)->myTickCallback(collisionSystem->getWorld(), 1);
 
 		//collision
 		collisionSystem->StepSimulation(1 / 60.0);	// step the physics simulation (default 1/60 seconds)
@@ -148,37 +147,39 @@ int Game::Play(){
 		glm::mat4 player_1;
 
 
+		// currently every entity must be known and access must be hard-codded to retrieve position & model
 
-		model_a = glm::translate(model_a, _entFactory->GetLevel_01()->GetPosition()); // Translate it down a bit so it's at the center of the scene
+
+		model_a = glm::translate(model_a, _gm->GetEntity(2)->GetPosition()); // Translate it down a bit so it's at the center of the scene
 		model_a = glm::scale(model_a, glm::vec3(1.0f, 1.0f, 1.0f));	// It's a bit too big for our scene, so scale it down
 																	//model_a = glm::rotate(model_a, float(-90 * DEG_TO_RADIAN), glm::vec3(1.0f, 0.0f, 0.0f));
 		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model_a));
 		//lvl1_a.Draw(shader);
-		_entFactory->GetLevel_01()->GetModel().Draw(shader);
+		_gm->GetEntity(2)->GetModel().Draw(shader);
 
-		model_b = glm::translate(model_b, _entFactory->GetLevel_02()->GetPosition()); // Translate it down a bit so it's at the center of the scene
-		model_b = glm::scale(model_b, glm::vec3(1.0f, 1.0f, 1.0f));	// It's a bit too big for our scene, so scale it down
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model_b));
-		_entFactory->GetLevel_02()->GetModel().Draw(shader);
+		//model_b = glm::translate(model_b, _gm->GetEntity(3)->GetPosition()); // Translate it down a bit so it's at the center of the scene
+		//model_b = glm::scale(model_b, glm::vec3(1.0f, 1.0f, 1.0f));	// It's a bit too big for our scene, so scale it down
+		//glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model_b));
+		//_gm->GetEntity(3)->GetModel().Draw(shader);
 
 
-		enemy_1 = glm::translate(enemy_1, _entFactory->GetDrone()->GetPosition()); // Translate it down a bit so it's at the center of the scene
+		enemy_1 = glm::translate(enemy_1, _gm->GetEntity(1)->GetPosition()); // Translate it down a bit so it's at the center of the scene
 		enemy_1 = glm::scale(enemy_1, glm::vec3(1.0f, 1.0f, 1.0f));	// It's a bit too big for our scene, so scale it down
 		enemy_1 = glm::rotate(enemy_1, float(-90 * DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
-		enemy_1 = glm::rotate(enemy_1, float(-_entFactory->GetDrone()->getAngle() * DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
+		enemy_1 = glm::rotate(enemy_1, float(-_gm->GetEntity(1)->getAngle() * DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
 		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(enemy_1));
-		_entFactory->GetDrone()->GetModel().Draw(shader);
-		_entFactory->GetDrone()->LookAt(_entFactory->GetPlayer()->GetPosition());
+		_gm->GetEntity(1)->GetModel().Draw(shader);
+		_gm->GetEntity(1)->LookAt(_gm->GetEntity(0)->GetPosition());
 
-		if (_entFactory->GetPlayer()->IsAlive()) {
-			float test = _entFactory->GetPlayer()->getAngle();
+		if (_gm->GetEntity(0)->IsAlive()) {
+			float test = _gm->GetEntity(0)->getAngle();
 			//cout << test << endl;
-			player_1 = glm::translate(player_1, _entFactory->GetPlayer()->GetPosition()); // Translate it down a bit so it's at the center of the scene
+			player_1 = glm::translate(player_1, _gm->GetEntity(0)->GetPosition()); // Translate it down a bit so it's at the center of the scene
 			player_1 = glm::scale(player_1, glm::vec3(0.1f, 0.1f, 0.1f));	// It's a bit too big for our scene, so scale it down
-			player_1 = glm::rotate(player_1, float(_entFactory->GetPlayer()->getAngle() * DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
+			player_1 = glm::rotate(player_1, float(_gm->GetEntity(0)->getAngle() * DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
 			glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(player_1));
 			//player.Draw(shader);
-			_entFactory->GetPlayer()->GetModel().Draw(shader);
+			_gm->GetEntity(0)->GetModel().Draw(shader);
 		}
 
 		// Swap the buffers
@@ -190,40 +191,47 @@ int Game::Play(){
 }
 
 void Game::DoMovement() {
-	if (_entFactory->GetPlayer()->IsAlive()) {
+	if (_gm->GetEntity(0)->IsAlive()) {
 		// Camera controls
 		if (!keys[GLFW_KEY_W] && !keys[GLFW_KEY_S] && !keys[GLFW_KEY_A] && !keys[GLFW_KEY_D])
 		{
-			_entFactory->GetPlayer()->Stop();
+			_gm->GetEntity(0)->Stop();
 		}
 
 		if (keys[GLFW_KEY_W])
 		{
-			_entFactory->GetPlayer()->ProcessKeyboard(ENTITY_UP, deltaTime);
+			_gm->GetEntity(0)->ProcessKeyboard(ENTITY_UP, deltaTime);
 		}
 
 
 		if (keys[GLFW_KEY_S])
 		{
-			_entFactory->GetPlayer()->ProcessKeyboard(ENTITY_DOWN, deltaTime);
+			_gm->GetEntity(0)->ProcessKeyboard(ENTITY_DOWN, deltaTime);
 		}
 
 		if (keys[GLFW_KEY_A])
 		{
-			_entFactory->GetPlayer()->ProcessKeyboard(ENTITY_LEFT, deltaTime);
+			_gm->GetEntity(0)->ProcessKeyboard(ENTITY_LEFT, deltaTime);
 		}
 
 		if (keys[GLFW_KEY_D])
 		{
-			_entFactory->GetPlayer()->ProcessKeyboard(ENTITY_RIGHT, deltaTime);
+			_gm->GetEntity(0)->ProcessKeyboard(ENTITY_RIGHT, deltaTime);
 
 		}
 
 		if (keys[GLFW_KEY_SPACE])
 		{
 			// play sound
-			_entFactory->GetPlayer()->playSound();
-			_entFactory->GetPlayer()->Attack();
+			_gm->GetEntity(0)->playSound();
+			_gm->GetEntity(0)->Attack();
+
+		}
+		if (keys[GLFW_KEY_TAB])
+		{
+			
+			// load next level for testing
+			_gm->LoadNextLevel();
 		}
 
 
@@ -232,7 +240,7 @@ void Game::DoMovement() {
 		{
 			if (keys[GLFW_KEY_UP])
 			{
-				_entFactory->GetPlayer()->SetAngle(180.0f);
+				_gm->GetEntity(0)->SetAngle(180.0f);
 
 				if (cameraModifier.z > -1.0f)
 				{
@@ -242,7 +250,7 @@ void Game::DoMovement() {
 
 			if (keys[GLFW_KEY_DOWN])
 			{
-				_entFactory->GetPlayer()->SetAngle(0.0f);
+				_gm->GetEntity(0)->SetAngle(0.0f);
 				if (cameraModifier.z < 1.0f)
 				{
 					cameraModifier.z += 0.1f;
@@ -251,7 +259,7 @@ void Game::DoMovement() {
 
 			if (keys[GLFW_KEY_LEFT])
 			{
-				_entFactory->GetPlayer()->SetAngle(-90.0f);
+				_gm->GetEntity(0)->SetAngle(-90.0f);
 				if (cameraModifier.x > -1.0f)
 				{
 					cameraModifier.x -= 0.1f;
@@ -260,7 +268,7 @@ void Game::DoMovement() {
 
 			if (keys[GLFW_KEY_RIGHT])
 			{
-				_entFactory->GetPlayer()->SetAngle(90.0f);
+				_gm->GetEntity(0)->SetAngle(90.0f);
 				if (cameraModifier.x < 1.0f)
 				{
 					cameraModifier.x += 0.1f;
@@ -269,23 +277,23 @@ void Game::DoMovement() {
 
 			if (keys[GLFW_KEY_UP] && keys[GLFW_KEY_LEFT])
 			{
-				_entFactory->GetPlayer()->SetAngle(180.0f + 45.0f);
+				_gm->GetEntity(0)->SetAngle(180.0f + 45.0f);
 
 			}
 
 			if (keys[GLFW_KEY_DOWN] && keys[GLFW_KEY_LEFT])
 			{
-				_entFactory->GetPlayer()->SetAngle(0.0f - 45.0f);
+				_gm->GetEntity(0)->SetAngle(0.0f - 45.0f);
 			}
 
 			if (keys[GLFW_KEY_UP] && keys[GLFW_KEY_RIGHT])
 			{
-				_entFactory->GetPlayer()->SetAngle(180.0f - 45.0f);
+				_gm->GetEntity(0)->SetAngle(180.0f - 45.0f);
 			}
 
 			if (keys[GLFW_KEY_DOWN] && keys[GLFW_KEY_RIGHT])
 			{
-				_entFactory->GetPlayer()->SetAngle(0.0f + 45.0f);
+				_gm->GetEntity(0)->SetAngle(0.0f + 45.0f);
 			}
 			
 		}
@@ -305,7 +313,7 @@ void Game::DoMovement() {
 	{
 		// kill player
 		cout << "killing" << endl;
-		_entFactory->GetPlayer()->Kill();
+		_gm->GetEntity(0)->Kill();
 	}
 }
 

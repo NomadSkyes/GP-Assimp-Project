@@ -15,33 +15,15 @@ public:
 		this->updateEntityVectors();
 		this->front = glm::vec3(0.0f, 0.0f, -1.0f);
 		this->movementSpeed = 4.0f;
-		SetStartPosition();
 		SetUpCollider();
 		SetUpAudio();
 		SetUpModel();
 	}
 
-	void SetAngle(float newPitch)
-	{
-		this->pitch = newPitch;
-		
-		
-	}
-
-	float getAngle()
-	{
-		//cout << "work! " << this->pitch << endl;
-		return this->pitch;
-	}
 
 private:
 
-	
 
-	// Set starting position
-	void SetStartPosition() {
-		this->position = glm::vec3(6.0f, 1.0f, 0.0f);
-	}
 	// set up the collider
 	void SetUpCollider() {
 		this->AddRigidBody(0);

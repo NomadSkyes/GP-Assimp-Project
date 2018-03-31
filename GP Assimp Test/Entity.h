@@ -53,12 +53,13 @@ public:
 
 	glm::vec3 GetPosition()
 	{
-		if (_cs != nullptr) {
+		if (this->_cs != nullptr) {
+			
 			// check to see if the object uses one, or multiple, rigidbodies
-			if (_rb != nullptr) {
+			if (this->_rb != nullptr) {
 				// return the position of the rigidbody
 				btTransform trans;
-				_rb->getMotionState()->getWorldTransform(trans);
+				this->_rb->getMotionState()->getWorldTransform(trans);
 				glm::vec3 updatedPos(trans.getOrigin().getX(), trans.getOrigin().getY(), trans.getOrigin().getZ());
 				this->position = updatedPos;
 				return this->position;
@@ -168,6 +169,11 @@ public:
 		}
 	}
 
+	// set the starting position
+	void SetStartPosition(glm::vec3 newPos) {
+		this->position = newPos;
+	}
+
 	void SetPosition(glm::vec3 newPos)
 	{
 		if (_cs != nullptr) {
@@ -228,7 +234,7 @@ public:
 	}
 
 	// add multiple rigidbodies to an object
-	void AddMultipleRigidBodies(float dx, float dy, float dz, float posx, float posy, float posz, float mass) {
+	void AddMultipleRigidBodies(double dx, double dy, double dz, float posx, float posy, float posz, int mass) {
 		if (_cs != nullptr) {
 			btRigidBody* _mRb = _cs->AddCube(dx, dy, dz, posx, posy, posz, mass);
 			_multiRb.push_back(_mRb);
@@ -295,6 +301,54 @@ public:
 		return this->isAlive;
 	}
 
+	// set entity id
+	void SetId(int _id) {
+		this->EntityId = _id;
+	}
+	// get entity id
+	int GetId() {
+		return this->EntityId;
+	}
+
+	float getAngle()
+	{
+		return this->pitch;
+	}
+
+	void SetAngle(float newPitch)
+	{
+		this->pitch = newPitch;
+
+
+	}
+
+	//get angle to point
+	void LookAt(glm::vec3 target)
+	{
+		float dot = (this->position.x*target.x) + (this->position.z*target.z);
+		float det = (this->position.x*target.z) + (this->position.z*target.x);
+		SetAngle(atan2(det, dot) * (180.0 / PI));
+		//cout << atan2(det, dot) * (180.0 / PI) << endl;
+
+		//float dot = (this->position.x*target.x) + (this->position.y*target.y) + (this->position.z*target.z);
+		//float lenSq1 = (this->position.x*this->position.x) + (this->position.y*this->position.y) + (this->position.z*this->position.z);
+		//float lenSq2 = (target.x*target.x) + (target.y*target.y) + (target.z*target.z);
+		//float output = acos(dot / sqrt(lenSq1 * lenSq2));
+		//SetAngle(output);
+
+	}
+
+
+	// change the playable state of the level
+	void SetPlayable(bool _val) {
+		this->isCurrentLevel = _val;
+	}
+
+	// set levele to be playable
+	bool IsPlayable() {
+		return this->isCurrentLevel;
+	}
+
 protected:
 	// Entity Attributes
 	glm::vec3 position;
@@ -303,7 +357,12 @@ protected:
 	glm::vec3 right;
 	glm::vec3 worldUp;
 
+	// Entity properties //
 	float isAlive = true;
+	int EntityId = 0;
+
+	// keep track of whether this is the current playable level
+	bool isCurrentLevel = false;
 
 	// model;
 	Model model;

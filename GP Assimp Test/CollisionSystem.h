@@ -124,7 +124,7 @@ public:
 	}
 
 	// create a cube
-	btRigidBody* AddCube(float width, float height, float depth, float x, float y, float z, float mass) {
+	btRigidBody* AddCube(double width, double height, double depth, float x, float y, float z, int mass) {
 		btTransform t;
 		t.setIdentity();
 		t.setOrigin(btVector3(x, y, z));

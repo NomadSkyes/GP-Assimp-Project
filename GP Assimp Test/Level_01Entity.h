@@ -15,7 +15,6 @@ public:
 		this->updateEntityVectors();
 		this->front = glm::vec3(0.0f, 0.0f, -1.0f);
 		this->movementSpeed = 4.0f;
-		SetStartPosition();
 		SetUpCollider();
 		SetUpModel();
 	}
@@ -23,24 +22,39 @@ public:
 	
 
 private:
-	// Set starting position
-	void SetStartPosition() {
-		this->position = glm::vec3(0.0f, 0.0f, 0.0f);
-	}
-	// set up the collider
+
+	// set up the colliders
 	void SetUpCollider() {
-		
-		this->AddMultipleRigidBodies(0.5, 5, 15, -7.5, 0, 0, 0.0);
-		this->AddMultipleRigidBodies(0.5, 5, 15, 7.5, 0, 0, 0.0);
-		this->AddMultipleRigidBodies(15, 5, 0.5, 0, 0, -7.5, 0.0);
-		this->AddMultipleRigidBodies(15, 5, 0.5, 0, 0, 7.5, 0.0);
-		this->AddMultipleRigidBodies(2.5, 5, 2.5, 0, 0, 0, 0.0);
+
+		//left top
+		this->AddMultipleRigidBodies(0.5,4.5, 5, this->position.x - 7.5, this->position.y, this->position.z + 4, 0.0);
+		//left bottom
+		this->AddMultipleRigidBodies(0.5,4.5, 5, this->position.x - 7.5, this->position.y, this->position.z  - 4, 0.0);
+
+		//right top
+		this->AddMultipleRigidBodies(0.5, 4.5, 5, this->position.x + 7.5, this->position.y, this->position.z + 4, 0.0);
+		//right bottom
+		this->AddMultipleRigidBodies(0.5, 4.5, 5, this->position.x + 7.5, this->position.y, this->position.z - 4, 0.0);
+
+
+		// top left
+		this->AddMultipleRigidBodies(5, 4.4, 0.5, this->position.x - 4, this->position.y, this->position.z - 7.5, 0.0);
+		// top right
+		this->AddMultipleRigidBodies(5, 4.4, 0.5, this->position.x + 4, this->position.y, this->position.z - 7.5, 0.0);
+
+		// bottom left
+		this->AddMultipleRigidBodies(5, 4.4, 0.5, this->position.x - 4, this->position.y, this->position.z + 7.5, 0.0);
+		// bottom right
+		this->AddMultipleRigidBodies(5, 4.4, 0.5, this->position.x + 4, this->position.y, this->position.z + 7.5, 0.0);
+
+		// center
+		this->AddMultipleRigidBodies(2.5, 5, 2.5, this->position.x, this->position.y, this->position.z, 0.0);
 	}
 
 	// set up the model
 	void SetUpModel() {
 		//this->SetModel("res/models/ForestFloor.obj");
-		string path = "res/models/ForestFloor.obj";
+		string path = "res/models/debugLVL.obj";
 		const char *_tmpChar = path.c_str();
 		this->model.LoadModel(_tmpChar);
 	}

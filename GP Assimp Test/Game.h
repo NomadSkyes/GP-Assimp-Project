@@ -16,6 +16,7 @@
 #include "Entity.h"
 #include "Model.h"
 #include "EntityFactory.h"
+#include "GameManager.h"
 
 // GLM Mathemtics
 #include <glm/glm.hpp>
@@ -25,8 +26,6 @@
 // Other Libs
 #include "SOIL2.h"
 
-//#include "Input.h"
-
 // bullet
 #include "CollisionSystem.h"
 
@@ -35,10 +34,14 @@
 
 #define DEG_TO_RADIAN 0.017453293
 
+
+
+
 class Game{
 public:
-	CollisionSystem* collisionSystem;
-	AudioSystem* audioSystem;
+	CollisionSystem* collisionSystem = nullptr;
+	AudioSystem* audioSystem = nullptr;
+	GameManager* _gm = nullptr;
 
 	// Properties
 	
@@ -47,8 +50,6 @@ public:
 	Camera* camera;
 	GLFWwindow *window = nullptr;
 
-	// create the EntityFactory
-	EntityFactory* _entFactory;
 
 	bool keys[1024];
 	GLfloat lastX = 400, lastY = 300;
@@ -77,14 +78,7 @@ public:
 	// Moves/alters the camera positions based on user input
 	void DoMovement() ;
 
-	// Is called whenever a key is pressed/released via GLFW
-	// Singleton is accessed via getInstance() for callback methods
-	// from https://stackoverflow.com/questions/7676971/pointing-to-a-function-that-is-a-class-member-glfw-setkeycallback
-	static inline  Game& getInstance(){
-		static Game instance;
-		return instance;
-		
-	}
+	
 	static void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mode) ;
 
 	static void MouseCallback(GLFWwindow *window, double xPos, double yPos) ;

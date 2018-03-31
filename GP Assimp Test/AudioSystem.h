@@ -1,8 +1,7 @@
 #pragma once
 #include <iostream>
 #include <irrKlang.h>
-#include <iostream>
-#include <map>
+#include <vector>
 #include <glm/glm.hpp>
 
 using namespace irrklang;
