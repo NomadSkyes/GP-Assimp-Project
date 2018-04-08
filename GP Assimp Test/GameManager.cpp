@@ -28,7 +28,7 @@ void GameManager::GameBegin() {
 	// player
 	SpawnPlayer();
 	// drone
-	SpawnEnemy(glm::vec3(-1.0f, 0.0f, 0.0f));
+	SpawnEnemy(glm::vec3(-3.0f, 0.0f, 0.0f));
 	
 	// load the first level
 	LoadLevel(2, glm::vec3(0,0,0));

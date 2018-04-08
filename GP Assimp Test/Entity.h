@@ -115,13 +115,16 @@ public:
 	void Attack()
 	{
 		if (isAlive) {
+			playSound();
+
 			// shoot raycast
 			btVector3 pos(this->position.x, this->position.y, this->position.z);
 			btVector3 dest(this->front.x, this->front.y, this->front.z);
 
 			if (_rb != nullptr || _cs != nullptr) {
 				//_cs->ShootRaycast(pos, (dest * 2));
-				_cs->ShootRaycast(pos, dest);
+
+				 _cs->ShootRaycast(pos, dest);
 			}
 			else {
 				cout << "no CollisionSystem reference! (4)" << endl;
@@ -215,14 +218,17 @@ public:
 				// sphere
 			case 0:
 				_rb = _cs->AddSphere(1.0, this->position.x, this->position.y, this->position.z, 1);
+				_cs->AddUserPointer(_rb, this);
 				break;
 				// cylinder
 			case 1:
 				_rb = _cs->AddCylinder(1.0, 2.0, this->position.x, this->position.y, this->position.z, 1);
+				_cs->AddUserPointer(_rb, this);
 				break;
 				// cube
 			case 2:
 				_rb = _cs->AddCube(1.0, 1.0, 1.0, this->position.x, this->position.y, this->position.z, 1);
+				_cs->AddUserPointer(_rb, this);
 				break;
 			default:
 				break;
@@ -233,10 +239,12 @@ public:
 		}
 	}
 
+
 	// add multiple rigidbodies to an object
 	void AddMultipleRigidBodies(double dx, double dy, double dz, float posx, float posy, float posz, int mass) {
 		if (_cs != nullptr) {
 			btRigidBody* _mRb = _cs->AddCube(dx, dy, dz, posx, posy, posz, mass);
+			_cs->AddUserPointer(_mRb, this);
 			_multiRb.push_back(_mRb);
 		}
 		else {

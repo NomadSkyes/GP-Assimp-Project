@@ -63,14 +63,17 @@ public:
 	//player & player camera positions
 	glm::vec3 playerCameraPos;
 
+	// rendering
+	// Setup and compile our shaders
+	Shader* shader;
+	glm::mat4 projection;
 
 	// default constructor
 	Game();
 
-	void Init(GLFWwindow* window);
+	int Init(GLFWwindow* window);
 
-	// constructor
-	//Game(GLFWwindow* _window);
+	
 
 	// Start game
 	int Play();
@@ -78,6 +81,8 @@ public:
 	// Moves/alters the camera positions based on user input
 	void DoMovement() ;
 
+	void Update(double deltaTime);
+	void Render();
 	
 	static void KeyCallback(GLFWwindow *window, int key, int scancode, int action, int mode) ;
 
