@@ -4,7 +4,7 @@
 #include <vector>
 
 // GL Includes
-#define GLEW_STATIC
+//#define GLEW_STATIC
 #include <GL/glew.h>
 
 #include <glm/glm.hpp>
@@ -120,8 +120,9 @@ public:
 		return this->zoom;
 	}
 
-	glm::vec3 GetPosition()
+	glm::vec3 &GetPosition()
 	{
+		 
 		return this->position;
 	}
 

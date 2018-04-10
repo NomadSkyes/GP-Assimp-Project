@@ -1,5 +1,4 @@
 #pragma once
-
 #include <string>
 #include <fstream>
 #include <sstream>
@@ -20,20 +19,30 @@
 
 using namespace std;
 
-GLint TextureFromFile(const char *path, string directory);
+//GLint TextureFromFile(const char *path, string directory);
 
 class Model
 {
 public:
 	/*  Functions   */
-	// Constructor, expects a filepath to a 3D model.
+	// Constructor, 
+	Model() {
+
+	}
 	Model(GLchar *path)
 	{
 		this->loadModel(path);
+
+	}
+
+	// expects a filepath to a 3D model.
+	void LoadModel(const char *path) {
+		this->loadModel(path);
+
 	}
 
 	// Draws the model, and thus all its meshes
-	void Draw(Shader shader)
+	void Draw(Shader* shader)
 	{
 		for (GLuint i = 0; i < this->meshes.size(); i++)
 		{
@@ -166,6 +175,35 @@ private:
 		return Mesh(vertices, indices, textures);
 	}
 
+
+	GLint TextureFromFile(const char *path, string directory)
+	{
+		//Generate texture ID and load texture data
+		string filename = string(path);
+		filename = directory + '/' + filename;
+		GLuint textureID;
+		glGenTextures(1, &textureID);
+
+		int width, height;
+
+		unsigned char *image = SOIL_load_image(filename.c_str(), &width, &height, 0, SOIL_LOAD_RGB);
+
+		// Assign texture to ID
+		glBindTexture(GL_TEXTURE_2D, textureID);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+		glGenerateMipmap(GL_TEXTURE_2D);
+
+		// Parameters
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glBindTexture(GL_TEXTURE_2D, 0);
+		SOIL_free_image_data(image);
+
+		return textureID;
+	}
+
 	// Checks all material textures of a given type and loads the textures if they're not loaded yet.
 	// The required info is returned as a Texture struct.
 	vector<Texture> loadMaterialTextures(aiMaterial *mat, aiTextureType type, string typeName)
@@ -207,30 +245,3 @@ private:
 	}
 };
 
-GLint TextureFromFile(const char *path, string directory)
-{
-	//Generate texture ID and load texture data
-	string filename = string(path);
-	filename = directory + '/' + filename;
-	GLuint textureID;
-	glGenTextures(1, &textureID);
-
-	int width, height;
-
-	unsigned char *image = SOIL_load_image(filename.c_str(), &width, &height, 0, SOIL_LOAD_RGB);
-
-	// Assign texture to ID
-	glBindTexture(GL_TEXTURE_2D, textureID);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
-	glGenerateMipmap(GL_TEXTURE_2D);
-
-	// Parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glBindTexture(GL_TEXTURE_2D, 0);
-	SOIL_free_image_data(image);
-
-	return textureID;
-}

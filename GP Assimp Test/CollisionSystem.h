@@ -2,6 +2,10 @@
 
 #include <btBulletDynamicsCommon.h>
 #include <vector>
+#include<iostream>
+using namespace std;
+
+
 
 class CollisionSystem {
 private:
@@ -11,7 +15,7 @@ private:
 	btBroadphaseInterface* broadphase;
 	btConstraintSolver* solver;
 
-	vector<btRigidBody*> bodies;
+	std::vector<btRigidBody*> bodies;
 
 	void init() {
 		this->collisionConfig = new btDefaultCollisionConfiguration();
@@ -26,7 +30,7 @@ private:
 
 
 	// physics callback
-	bool callbackFunc(btManifoldPoint& contactPoint, const btCollisionObjectWrapper* obj1, int id1, int index1, const btCollisionObjectWrapper* obj2, int id2, int index2) {
+	bool contactAddedCallbackBullet(btManifoldPoint& contactPoint, const btCollisionObjectWrapper* obj1, int id1, int index1, const btCollisionObjectWrapper* obj2, int id2, int index2) {
 		std::cout << "collision" << endl;
 		return false;
 	}
@@ -36,7 +40,7 @@ public:
 		init();
 		
 		// physics callback
-		//gContactAddedCallback = callbackFunc;
+		//gContactAddedCallback = contactAddedCallbackBullet;
 	}
 	// delete colliders
 	~CollisionSystem() {
@@ -66,6 +70,7 @@ public:
 		btMotionState* motion = new btDefaultMotionState(t);
 		btRigidBody::btRigidBodyConstructionInfo info(0.0, motion, plane);
 		btRigidBody* body = new btRigidBody(info);
+		body->setRollingFriction(18.0f);
 		AddBody(body);
 
 		return body;
@@ -88,7 +93,10 @@ public:
 		btRigidBody* body = new btRigidBody(info);
 		AddBody(body);
 
-		//debugging
+		// testing limiting rotation of collider
+		body->setAngularFactor(btVector3(0, 0, 0));
+
+		//collision flags
 		body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
 
 
@@ -111,11 +119,14 @@ public:
 		btRigidBody::btRigidBodyConstructionInfo info(mass, motion, cylinder, inertia);
 		btRigidBody* body = new btRigidBody(info);
 		AddBody(body);
+
+		//collision flags
+		body->setCollisionFlags(body->getCollisionFlags() | btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
 		return body;
 	}
 
 	// create a cube
-	btRigidBody* AddCube(float width, float height, float depth, float x, float y, float z, float mass) {
+	btRigidBody* AddCube(double width, double height, double depth, float x, float y, float z, int mass) {
 		btTransform t;
 		t.setIdentity();
 		t.setOrigin(btVector3(x, y, z));
@@ -134,8 +145,31 @@ public:
 	}
 
 	// step the simulation based on the time between frames
+	// called every update
 	void StepSimulation(float step) {
 		this->world->stepSimulation(step);
+
+
+		/*int numManifolds = world->getDispatcher()->getNumManifolds();
+		for (int i = 0; i < numManifolds; i++)
+		{
+			btPersistentManifold* contactManifold = world->getDispatcher()->getManifoldByIndexInternal(i);
+			const btCollisionObject* obA = contactManifold->getBody0();
+			const btCollisionObject* obB = contactManifold->getBody1();
+
+			int numContacts = contactManifold->getNumContacts();
+			for (int j = 0; j < numContacts; j++)
+			{
+				btManifoldPoint& pt = contactManifold->getContactPoint(j);
+				if (pt.getDistance() < 0.f)
+				{
+					const btVector3& ptA = pt.getPositionWorldOnA();
+					const btVector3& ptB = pt.getPositionWorldOnB();
+					const btVector3& normalOnB = pt.m_normalWorldOnB;
+				}
+			}
+		}*/
+
 	}
 
 	// add rigidbody to world
@@ -144,7 +178,37 @@ public:
 		bodies.push_back(body);
 	}
 
+	void AddUserPointer(btRigidBody* _body, void *_user) {
+		_body->setUserPointer(_user);
+	}
 
+	btDynamicsWorld* getWorld()
+	{
+		return this->world;
+	}
+
+	// draw ray using starting point, and end
+	void ShootRaycast(const btVector3 &Start, btVector3 &End) {
+
+		btCollisionWorld::ClosestRayResultCallback RayCallback(Start, End);
+
+		// Perform raycast
+		world->rayTest(Start, End, RayCallback);
+
+		if (RayCallback.hasHit()) {
+
+
+			//Entity* _entity = (Entity)(RayCallback.m_collisionObject().getUserPointer());
+			//Entity* _entity = RayCallback.m_collisionObject.getUserPointer;
+			//if (_entity != nullptr) {
+		//		std::cout << "hit" << _entity->GetId << endl;
+		//	}
+			
+			//const btCollisionObject* _object = RayCallback.m_collisionObject;
+			//return _object->getUserPointer();
+			// Do some clever stuff here
+		}
+	}
 
 };
 
