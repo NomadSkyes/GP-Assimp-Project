@@ -19,6 +19,7 @@
 // other
 #include "Model.h"
 
+
 #define PI 3.14159265
 
 // Defines several possible options for Entity movement. Used as abstraction to stay away from window-system specific input methods
@@ -326,7 +327,7 @@ public:
 			}
 		}
 
-		if (_rb != nullptr)
+		if (this->_rb != nullptr)
 		{
 			_cs->getWorld()->removeRigidBody(this->_rb);
 		}

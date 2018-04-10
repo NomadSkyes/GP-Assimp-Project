@@ -71,6 +71,7 @@ int Game::Init(GLFWwindow* _window) {
 	// Define the viewport dimensions
 	glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
+
 	// OpenGL options
 	glEnable(GL_DEPTH_TEST);
 
@@ -178,22 +179,28 @@ void Game::Render() {
 	//glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model_b));
 	//_gm->GetEntity(3)->GetModel().Draw(shader);
 
+	if (_gm->GetEntity(1)->IsAlive())
+	{
+		enemy_1 = glm::translate(enemy_1, _gm->GetEntity(1)->GetPosition()); // Translate it down a bit so it's at the center of the scene
+		enemy_1 = glm::scale(enemy_1, glm::vec3(1.0f, 1.0f, 1.0f));	// It's a bit too big for our scene, so scale it down
+		enemy_1 = glm::rotate(enemy_1, float(-180 * DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
+		enemy_1 = glm::rotate(enemy_1, float(_gm->GetEntity(1)->getAngle() * DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
+		glUniformMatrix4fv(glGetUniformLocation(shader->Program, "model"), 1, GL_FALSE, glm::value_ptr(enemy_1));
+		_gm->GetEntity(1)->GetModel().Draw(shader);
+		_gm->GetEntity(1)->LookAt(_gm->GetEntity(0)->GetPosition());
+	}
 
-	enemy_1 = glm::translate(enemy_1, _gm->GetEntity(1)->GetPosition()); // Translate it down a bit so it's at the center of the scene
-	enemy_1 = glm::scale(enemy_1, glm::vec3(1.0f, 1.0f, 1.0f));	// It's a bit too big for our scene, so scale it down
-	enemy_1 = glm::rotate(enemy_1, float(-180 * DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
-	enemy_1 = glm::rotate(enemy_1, float(_gm->GetEntity(1)->getAngle() * DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
-	glUniformMatrix4fv(glGetUniformLocation(shader->Program, "model"), 1, GL_FALSE, glm::value_ptr(enemy_1));
-	_gm->GetEntity(1)->GetModel().Draw(shader);
-	_gm->GetEntity(1)->LookAt(_gm->GetEntity(0)->GetPosition());
+	if (_gm->GetEntity(3)->IsAlive())
+	{
+		enemy_2 = glm::translate(enemy_2, _gm->GetEntity(3)->GetPosition()); // Translate it down a bit so it's at the center of the scene
+		enemy_2 = glm::scale(enemy_2, glm::vec3(1.0f, 1.0f, 1.0f));	// It's a bit too big for our scene, so scale it down
+		enemy_2 = glm::rotate(enemy_2, float(-180 * DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
+		enemy_2 = glm::rotate(enemy_2, float(_gm->GetEntity(3)->getAngle() * DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
+		glUniformMatrix4fv(glGetUniformLocation(shader->Program, "model"), 1, GL_FALSE, glm::value_ptr(enemy_2));
+		_gm->GetEntity(3)->GetModel().Draw(shader);
+		_gm->GetEntity(3)->LookAt(_gm->GetEntity(0)->GetPosition());
+	}
 
-	enemy_2 = glm::translate(enemy_2, _gm->GetEntity(3)->GetPosition()); // Translate it down a bit so it's at the center of the scene
-	enemy_2 = glm::scale(enemy_2, glm::vec3(1.0f, 1.0f, 1.0f));	// It's a bit too big for our scene, so scale it down
-	enemy_2 = glm::rotate(enemy_2, float(-180 * DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
-	enemy_2 = glm::rotate(enemy_2, float(_gm->GetEntity(3)->getAngle() * DEG_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
-	glUniformMatrix4fv(glGetUniformLocation(shader->Program, "model"), 1, GL_FALSE, glm::value_ptr(enemy_2));
-	_gm->GetEntity(3)->GetModel().Draw(shader);
-	_gm->GetEntity(3)->LookAt(_gm->GetEntity(0)->GetPosition());
 
 	if (_gm->levelNum() >= 2)
 	{
@@ -352,6 +359,15 @@ void Game::DoMovement() {
 				cameraModifier.z -= 0.1f;
 			if (cameraModifier.z < 0)
 				cameraModifier.z += 0.1f;
+		}
+
+		if (keys[GLFW_KEY_1])
+		{
+			_gm->GetEntity(1)->Kill();
+		}
+		if (keys[GLFW_KEY_2])
+		{
+			_gm->GetEntity(3)->Kill();
 		}
 	}
 	

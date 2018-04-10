@@ -2,7 +2,6 @@
 #include "GameManager.h"
 
 
-
 GameManager::GameManager() {
 };
 
@@ -10,7 +9,6 @@ void GameManager::SetUp(AudioSystem* _as, CollisionSystem* _cs){
 	
 	this->_AudioSystem = _as;
 	this-> _CollisionSystem = _cs;
-
 	// create the entity factory and pass in the references
 	_entFactory = new EntityFactory();
 	_entFactory->SetUp(_as, _cs);
@@ -28,13 +26,13 @@ void GameManager::GameBegin() {
 	// player
 	SpawnPlayer();
 	// drone
-	SpawnEnemy(glm::vec3(-3.0f, 1.0f, 0.0f));
+	SpawnEnemy(glm::vec3(-10.0f, 1.0f, 0.0f));
 	
 	
 	// load the first level
 	LoadLevel(2, glm::vec3(0,0,0));
 
-	SpawnEnemy(glm::vec3(3.0f, 1.0f, 0.0f));
+	SpawnEnemy(glm::vec3(10.0f, 1.0f, 0.0f));
 
 };
 
