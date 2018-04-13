@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27004.2006
+VisualStudioVersion = 15.0.27004.2005
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Super Battle Arena!", "GP Assimp Test\GP Assimp Test.vcxproj", "{97D9AD0B-ED2E-4237-A3C4-94217E7C8AFE}"
 EndProject
@@ -25,8 +25,8 @@ Global
 		{97D9AD0B-ED2E-4237-A3C4-94217E7C8AFE}.MinSizeRel|x64.Build.0 = Debug|x64
 		{97D9AD0B-ED2E-4237-A3C4-94217E7C8AFE}.MinSizeRel|x86.ActiveCfg = Release|Win32
 		{97D9AD0B-ED2E-4237-A3C4-94217E7C8AFE}.MinSizeRel|x86.Build.0 = Release|Win32
-		{97D9AD0B-ED2E-4237-A3C4-94217E7C8AFE}.Release|x64.ActiveCfg = Release|x64
-		{97D9AD0B-ED2E-4237-A3C4-94217E7C8AFE}.Release|x64.Build.0 = Release|x64
+		{97D9AD0B-ED2E-4237-A3C4-94217E7C8AFE}.Release|x64.ActiveCfg = Release|Win32
+		{97D9AD0B-ED2E-4237-A3C4-94217E7C8AFE}.Release|x64.Build.0 = Release|Win32
 		{97D9AD0B-ED2E-4237-A3C4-94217E7C8AFE}.Release|x86.ActiveCfg = Release|Win32
 		{97D9AD0B-ED2E-4237-A3C4-94217E7C8AFE}.Release|x86.Build.0 = Release|Win32
 		{97D9AD0B-ED2E-4237-A3C4-94217E7C8AFE}.RelWithDebInfo|x64.ActiveCfg = Release|x64
